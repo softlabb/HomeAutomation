@@ -96,42 +96,47 @@ void loop()
       // get the battery Voltage
     int sensorValue = analogRead(BATTERY_SENSE_PIN);
     int batteryPcnt = sensorValue / 10;
-      
-  // Fetch temperatures from Dallas sensors
-  sensors.requestTemperatures();
 
-  // query conversion time and sleep until conversion completed
-  int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
-  // sleep() call can be replaced by wait() call if node need to process incoming messages (or if node is repeater)
-  sleep(conversionTime);
+	if(numSensors!=0)
+	{      
+	  // Fetch temperatures from Dallas sensors
+	  sensors.requestTemperatures();
 
-  // Read temperatures and send them to controller 
-  for (int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++) {
+	  // query conversion time and sleep until conversion completed
+	  int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
+	  // sleep() call can be replaced by wait() call if node need to process incoming messages (or if node is repeater)
+	  sleep(conversionTime);
+	}
+	
+	// Read temperatures and send them to controller 
+	for (int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++) 
+	{
+		// Fetch and round temperature to one decimal
+		float temperature = static_cast<float>(static_cast<int>((getControllerConfig().isMetric?sensors.getTempCByIndex(i):sensors.getTempFByIndex(i)) * 10.)) / 10.;
 
-    // Fetch and round temperature to one decimal
-    float temperature = static_cast<float>(static_cast<int>((getControllerConfig().isMetric?sensors.getTempCByIndex(i):sensors.getTempFByIndex(i)) * 10.)) / 10.;
+		// Only send data if temperature has changed and no error
+		#if COMPARE_TEMP == 1
+		if (lastTemperature[i] != temperature && temperature != -127.00 && temperature != 85.00) {
+		#else
+		if (temperature != -127.00 && temperature != 85.00) {
+		#endif
 
-    // Only send data if temperature has changed and no error
-    #if COMPARE_TEMP == 1
-    if (lastTemperature[i] != temperature && temperature != -127.00 && temperature != 85.00) {
-    #else
-    if (temperature != -127.00 && temperature != 85.00) {
-    #endif
-
-      // Send in the new temperature
-      send(msg.setSensor(i).set(temperature,1));
-      // Save new temperatures for next compare
-      lastTemperature[i]=temperature;
-    }
-    else
-      sendHeartbeat();
-  }
-    if (oldBatteryPcnt != batteryPcnt) {
+			  // Send in the new temperature
+			  send(msg.setSensor(i).set(temperature,1));
+			  // Save new temperatures for next compare
+			  lastTemperature[i]=temperature;
+		}
+		else
+			sendHeartbeat();
+	}
+    
+	if (oldBatteryPcnt != batteryPcnt) 
+	{
         // Power up radio after sleep
         sendBatteryLevel(batteryPcnt);
         oldBatteryPcnt = batteryPcnt;
     }
     
-  sleep(SLEEP_TIME);
+	sleep(SLEEP_TIME);
 }
 
