@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>7.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.CPP</ToolchainName>
-    <ProjectGuid>{bf6c1a31-7b61-4a0e-acf6-56230c1315df}</ProjectGuid>
+    <ProjectGuid>{6ef473c6-bc30-4ba0-bb11-fe36110f784c}</ProjectGuid>
     <avrdevice>atmega328p</avrdevice>
     <avrdeviceseries>none</avrdeviceseries>
     <OutputType>Executable</OutputType>
@@ -27,15 +27,15 @@
     <BootSegment>0</BootSegment>
     <AsfFrameworkConfig>
       <framework-data>
-  <options />
-  <configurations />
-  <files />
-  <documentation help="" />
-  <offline-documentation help="" />
-  <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.26.0" />
-  </dependencies>
-</framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.26.0" />
+        </dependencies>
+      </framework-data>
     </AsfFrameworkConfig>
     <preserveEEPROM>true</preserveEEPROM>
     <avrtool>com.atmel.avrdbg.tool.atmelice</avrtool>
@@ -87,9 +87,10 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-lib-hc-sr04-master/src</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -133,9 +134,10 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-lib-hc-sr04-master/src</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -158,7 +160,7 @@
   <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
 </AvrGccCpp>
     </ToolchainSettings>
-    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.16/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library;C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-lib-hc-sr04-master/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;</VMSETTING_IncludePaths>
+    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;</VMSETTING_IncludePaths>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
@@ -192,9 +194,10 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-lib-hc-sr04-master/src</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -238,9 +241,10 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-lib-hc-sr04-master/src</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -263,7 +267,7 @@
   <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
 </AvrGccCpp>
     </ToolchainSettings>
-    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.16/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library;C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-lib-hc-sr04-master/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;</VMSETTING_IncludePaths>
+    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;</VMSETTING_IncludePaths>
   </PropertyGroup>
   <ItemGroup>
     <None Include="Pump.ino">

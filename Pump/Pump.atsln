@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Pump", "Pump.cppproj", "{BF6C1A31-7B61-4A0E-ACF6-56230C1315DF}"
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Pump", "Pump.cppproj", "{6EF473C6-BC30-4BA0-BB11-FE36110F784C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BF6C1A31-7B61-4A0E-ACF6-56230C1315DF}.Debug|AVR.ActiveCfg = Debug|AVR
-		{BF6C1A31-7B61-4A0E-ACF6-56230C1315DF}.Debug|AVR.Build.0 = Debug|AVR
-		{BF6C1A31-7B61-4A0E-ACF6-56230C1315DF}.Release|AVR.ActiveCfg = Release|AVR
-		{BF6C1A31-7B61-4A0E-ACF6-56230C1315DF}.Release|AVR.Build.0 = Release|AVR
+		{6EF473C6-BC30-4BA0-BB11-FE36110F784C}.Debug|AVR.ActiveCfg = Debug|AVR
+		{6EF473C6-BC30-4BA0-BB11-FE36110F784C}.Debug|AVR.Build.0 = Debug|AVR
+		{6EF473C6-BC30-4BA0-BB11-FE36110F784C}.Release|AVR.ActiveCfg = Release|AVR
+		{6EF473C6-BC30-4BA0-BB11-FE36110F784C}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

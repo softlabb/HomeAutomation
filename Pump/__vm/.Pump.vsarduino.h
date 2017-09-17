@@ -24,6 +24,19 @@ void before();
 void presentation();
 //
 void receive(const MyMessage &message);
+void encoderIsr();
+void pomiarIsr();
+void onKeyboard();
+void onKeyStop();
+void onKeyManl();
+void EkranIntro();
+void EkranStop();
+void EkranMenu();
+void displayMenuItem(String item, int position, boolean selected);
+void displayStringMenuPage(String menuItem, String value);
+void EkranPomiar(boolean oAUTO, boolean oMANL, boolean oPOMP);
+void resetDefaults();
+void readRotaryEncoder();
 
 #include "pins_arduino.h" 
 #include "Arduino.h"
