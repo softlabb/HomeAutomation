@@ -34,11 +34,12 @@
 //#define MY_RADIO_RFM69
 
 
+#define MY_RF24_CE_PIN 49
+#define MY_RF24_CS_PIN 53
 
 #include <SPI.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
-
 #include <MySensors.h>  
 
 #define COMPARE_TEMP 1 // Send temperature only if changed? 1 = Yes 0 = No
@@ -80,7 +81,7 @@ void setup()
 
 void presentation() {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Temp+Battery Meter", "1.0");
+  sendSketchInfo("TEST Meter", "1.0");
 
   // Fetch the number of attached temperature sensors  
   numSensors = sensors.getDeviceCount();

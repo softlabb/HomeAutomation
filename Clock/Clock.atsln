@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Clock", "Clock.cppproj", "{391C9BC7-7766-4F8A-ABB0-3CFEA0289F3C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{391C9BC7-7766-4F8A-ABB0-3CFEA0289F3C}.Debug|AVR.ActiveCfg = Debug|AVR
+		{391C9BC7-7766-4F8A-ABB0-3CFEA0289F3C}.Debug|AVR.Build.0 = Debug|AVR
+		{391C9BC7-7766-4F8A-ABB0-3CFEA0289F3C}.Release|AVR.ActiveCfg = Release|AVR
+		{391C9BC7-7766-4F8A-ABB0-3CFEA0289F3C}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

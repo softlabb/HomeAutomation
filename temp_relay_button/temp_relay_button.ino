@@ -106,7 +106,7 @@ void setup()
 void presentation()
 {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Triac & Button & Temp", "1.0");
+  sendSketchInfo("Triac & Button & Temp", "1.1");
 
   // Register all sensors to gw (they will be created as child devices)
   present(0, S_TEMP);
