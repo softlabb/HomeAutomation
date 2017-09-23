@@ -35,6 +35,9 @@ int numberOfVerticalDisplays = 1;
 
 Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
 
+// Initialize messages for sensor network
+MyMessage textMsg(0, V_TEXT);
+
 //int wait   = 80; // In milliseconds
 int spacer = 1;
 int width  = 5 + spacer; // The font width is 5 pixels
@@ -57,6 +60,7 @@ void before() {
 void presentation() {
 	// Send the sketch version information to the gateway and Controller
 	sendSketchInfo("RTC Clock matrix", "1.0");
+	present(0, S_INFO); 
 }
 
 //***************************************************************************************
@@ -69,6 +73,8 @@ void setup() {
 	// Request latest time from controller at startup
 	requestTime();
    
+	send(textMsg.setSensor(0).set("-"));
+	
   //pinMode(ButtonPinIntensity, INPUT_PULLUP);
   //buttonIntensity.SetStateAndTime(LOW);
 
@@ -105,6 +111,8 @@ void loop()
     if (now-lastUpdate > 1000) {
 	    updateDisplay();
 	    lastUpdate = now;
+		//equest(messageCHILD, V_TEXT, 0);
+		//request(0,V_TEXT);
     }
 /*	
   //################################################
@@ -336,6 +344,12 @@ void loop()
       break;
   }
 */
+}
+
+void receive(const MyMessage &message) {
+	if (message.type == V_TEXT) {
+		
+	}
 }
 
 void updateDisplay(){

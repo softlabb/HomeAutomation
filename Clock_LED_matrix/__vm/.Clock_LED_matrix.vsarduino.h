@@ -23,6 +23,7 @@ void presentation();
 //
 void receiveTime(unsigned long controllerTime);
 //
+void receive(const MyMessage &message);
 void updateDisplay();
 void NowyRok();
 void anime1();
