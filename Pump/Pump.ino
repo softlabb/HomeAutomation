@@ -539,7 +539,6 @@ void loop()
 				zbiornikPoziom_l=zbiornikPoziom;
 				send(msg_poziom.set(zbiornikPoziom));
 			}
-
 			break;
 	 	
 		case 1:
@@ -648,17 +647,17 @@ void onKeyStop()
 	if(konfig.wrkMode!=2)
 	{
 		// wejście do ekranu STOP
+		send(msg_stop.set(true));
 		konfig.wrkMode=2;
 		timerPomiar.disable();
 		saveState(EEPROM_wrkMode, konfig.wrkMode);
-		send(msg_stop.set(true));
 	}
 	else
 	{
+		send(msg_stop.set(false));
 		konfig.wrkMode=0;
 		timerPomiar.enable();
 		saveState(EEPROM_wrkMode, konfig.wrkMode);
-		send(msg_stop.set(false));
 	}
 }
 
