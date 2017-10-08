@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>7.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.CPP</ToolchainName>
-    <ProjectGuid>{6ef473c6-bc30-4ba0-bb11-fe36110f784c}</ProjectGuid>
+    <ProjectGuid>{f31073b4-55cd-4c64-987c-84aa71256822}</ProjectGuid>
     <avrdevice>atmega328p</avrdevice>
     <avrdeviceseries>none</avrdeviceseries>
     <OutputType>Executable</OutputType>
@@ -44,7 +44,7 @@
     <com_atmel_avrdbg_tool_atmelice>
       <ToolOptions>
         <InterfaceProperties>
-          <IspClock>1000000</IspClock>
+          <IspClock>1041609</IspClock>
         </InterfaceProperties>
         <InterfaceName>ISP</InterfaceName>
       </ToolOptions>
@@ -53,7 +53,7 @@
       <ToolName>Atmel-ICE</ToolName>
     </com_atmel_avrdbg_tool_atmelice>
     <avrtoolinterface>ISP</avrtoolinterface>
-    <avrtoolinterfaceclock>1000000</avrtoolinterfaceclock>
+    <avrtoolinterfaceclock>1041609</avrtoolinterfaceclock>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -69,7 +69,6 @@
     <ListValues>
       <Value>__AVR_ATmega328p__</Value>
       <Value>__AVR_ATmega328P__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10804</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=16000000L</Value>
@@ -78,19 +77,25 @@
       <Value>ARDUINO_ARCH_AVR</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.preprocessor.UndefSymbols>
+    <ListValues>
+      <Value>RR</Value>
+    </ListValues>
+  </avrgcc.compiler.preprocessor.UndefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>../../../Pump</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -116,7 +121,6 @@
     <ListValues>
       <Value>__AVR_ATmega328p__</Value>
       <Value>__AVR_ATmega328P__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10804</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=16000000L</Value>
@@ -131,13 +135,14 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -160,7 +165,12 @@
   <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
 </AvrGccCpp>
     </ToolchainSettings>
-    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;</VMSETTING_IncludePaths>
+    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/Time;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src;</VMSETTING_IncludePaths>
+    <VisualMicroSettings>
+      <VisualMicroSettings xmlns="">
+        <vm.upload.useprogrammer>1</vm.upload.useprogrammer>
+      </VisualMicroSettings>
+    </VisualMicroSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
@@ -176,7 +186,6 @@
     <ListValues>
       <Value>__AVR_ATmega328p__</Value>
       <Value>__AVR_ATmega328P__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10804</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=16000000L</Value>
@@ -185,19 +194,25 @@
       <Value>ARDUINO_ARCH_AVR</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.preprocessor.UndefSymbols>
+    <ListValues>
+      <Value>RR</Value>
+    </ListValues>
+  </avrgcc.compiler.preprocessor.UndefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>../../../Pump</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -223,7 +238,6 @@
     <ListValues>
       <Value>__AVR_ATmega328p__</Value>
       <Value>__AVR_ATmega328P__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10804</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=16000000L</Value>
@@ -238,13 +252,14 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
+      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
@@ -267,26 +282,26 @@
   <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
 </AvrGccCpp>
     </ToolchainSettings>
-    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_PCD8544_Nokia_5110_LCD_library;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;</VMSETTING_IncludePaths>
+    <VMSETTING_IncludePaths>../../../Pump;C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library;C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master;C:/Users/kfurmaniak/Documents/Arduino/libraries/encoder-arduino;C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors;C:/Users/kfurmaniak/Documents/Arduino/libraries/NewPing;C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction;C:/Users/kfurmaniak/Documents/Arduino/libraries/TimerOne-r11;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;D:/Program Files (x86)/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/kfurmaniak/Documents/Arduino/libraries;D:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;D:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/standard;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;D:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include;D:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.9.3/include;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/kfurmaniak/Documents/Arduino/libraries/Time;D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src;</VMSETTING_IncludePaths>
+    <VisualMicroSettings>
+      <VisualMicroSettings xmlns="">
+        <vm.upload.useprogrammer>1</vm.upload.useprogrammer>
+      </VisualMicroSettings>
+    </VisualMicroSettings>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="ekrany.ino">
+    <Compile Include="ekrany.ino">
       <SubType>compile</SubType>
-    </None>
-    <None Include="keyboard.ino">
+    </Compile>
+    <Compile Include="__vm\.Pump.vsarduino.h">
       <SubType>compile</SubType>
-    </None>
+    </Compile>
     <None Include="Pump.ino">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="__vm\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="__vm\.Pump.vsarduino.h">
-      <SubType>compile</SubType>
-    </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

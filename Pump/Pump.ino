@@ -19,167 +19,271 @@
  *******************************
  *
  * REVISION HISTORY
- * Version 1.0 - Henrik Ekblad
+ * Version 1.0 - Krzysztof Furmaniak
  *
  * DESCRIPTION
- * Example sketch showing how to control physical relays.
- * This example will remember relay state after power failure.
- * http://www.mysensors.org/build/relay
+ *
  */
 
 #ifndef F_CPU
 #define F_CPU 1600000UL
 #endif
 
+#define RADIO 0
+
+
+
+#ifdef RADIO
 // Enable debug prints to serial monitor
 //#define MY_DEBUG
-
-// Enable and select radio type attached
 #define MY_RADIO_NRF24
-//#define MY_RADIO_RFM69
-
-// Enable repeater functionality for this node
 #define MY_REPEATER_FEATURE
-
+	
 #include <MySensors.h>
-//#include <Arduino.h>
+#endif
+
+
 #include <Adafruit_GFX.h>
-#include <Adafruit_PCD8544.h>
+#include <Max72xxPanel.h>
 #include <PCF8574.h>
 #include <Wire.h>
 #include <NewPing.h>
 #include <ClickEncoder.h>
 #include <TimerOne.h>
 #include <TimedAction.h>
+#include <Timelib.h>
 #include <ACS7xx_Allegro.h>
 
-#define SENSOR_RELAY_PIN	4       // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
-#define SENSOR_RELAY_ID		1
-#define RELAY_ON			1       // GPIO value to write to turn on attached relay
-#define RELAY_OFF			0		// GPIO value to write to turn off attached relay
-#define SENSOR_SR04_ID		2
-#define SENSOR_ACS_ID	    3		//SENSOR_ACS_ID
+#define PUMP_PIN				8       // Arduino Digital I/O pin number
+#define PUMP_ON					1       
+#define PUMP_OFF				0		
 
-#define LED_PIN_MEASURE		3
-#define LED_PIN_PUMP		2
-#define LED_PIN_OVER		1
-#define LED_PIN_STOP		0
-#define LED_PIN_LCD			7
+#define BTN_MANL				0		// PCF expander address for button MANUAL
+#define BTN_STOP				1
+#define PCF_INT_PIN				2
+
+// mySensors child node ID
+#define SENSOR_PUMP_ID			1		// pump ON/OFF
+#define SENSOR_STOP_ID			2		// wrkMode ON/OFF (0-pomiar, 2-stop)
+#define SENSOR_INFO_ID			3		// zbiornikMax
+#define SENSOR_WATER_ID			4		// current level of water
+
+#define SR04_TRIGGER_PIN		4		// Arduino pin tied to trigger pin on the ultrasonic sensor.
+#define SR04_ECHO_PIN			3		// Arduino pin tied to echo pin on the ultrasonic sensor.
+#define SR04_MAX_DISTANCE		100		// Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+
+// Adresy zmiennych w pamięcie EEPROM
+#define EEPROM_wrkMode			0
+#define EEPROM_trybPracy		1	// AUTO/MANUAL
+#define EEPROM_pomiarInterwal	2
+#define EEPROM_sensorMin		3
+#define EEPROM_sensorMax		4
+
+// Menu
+int menuitem					= 1;
+int frame						= 1;
+int page						= 1;
+int lastMenuItem				= 1;
+long inter						= 40;
+int	i							= 0;
+int waitt						= 50; // In milliseconds
+int spacer						= 1;
+int width						= 5 + spacer; // The font width is 5 pixels
+unsigned long lastt				= 0;
+unsigned long lat				= 0;
+boolean blinkPomiar;
+
+// Encoder
+unsigned int selectedValue;
+boolean up						= false;
+boolean down					= false;
+boolean middle					= false;
+boolean press					= true;
+int16_t last, value;
+
+// LED matrix
+int pinCS						= 7; // Attach CS to this pin, DIN to MOSI(11) and CLK to SCK(13) (cf http://arduino.cc/en/Reference/SPI )
+int numberOfHorizontalDisplays	= 2;
+int numberOfVerticalDisplays	= 1;
+
+// Tank description
+unsigned int sensorPoziom		= 0;		// aktualna wartosc odczytana z sensora
+unsigned int zbiornikPoziom		= 0;		// aktualna wartosc odczytana z sensora
+unsigned int zbiornikPoziom_l	= 0;
+unsigned int zbiornikMax;
+unsigned int uS;
+
+//Parametry pracy zapisywane w pamięcie EEPROM
+struct
+{
+	int wrkMode;
+	boolean	trybPracy			= false;	//true-Auto, false-Manual
+	unsigned int pomiarInterwal = 1;		// 1-90 sec
+	unsigned int sensorMin		= 28;		// 1-99 cm, dno zbiornika czyli z sensora duza wartość
+	unsigned int sensorMax		= 8;		// 2-99 cm, gora zbiornika czyli z sensowa mala wartosc sensorMax<sensorMin
+}konfig;
+
+NewPing sonar(SR04_TRIGGER_PIN, SR04_ECHO_PIN, SR04_MAX_DISTANCE);
 
 PCF8574 expander;
 
-boolean backlight = true;
-
-//Menu
-int menuitem = 1;
-int frame = 1;
-int page = 1;
-int lastMenuItem = 1;
-
-String menuItem1 = "Back";
-String menuItem2 = "Mode: AUTO";
-String menuItem3 = "MIN Level";
-String menuItem4 = "MAX Level";
-String menuItem5 = "Measure time";
-String menuItem6 = "Light: ON";
-String menuItem7 = "Statistic";
-String menuItem8 = "Reset";
-String menuItem9 = "About";
-
-boolean up = false;
-boolean down = false;
-boolean middle = false;
+void pomiarIsr();
 
 ClickEncoder *encoder;
-int16_t last, value;
 
-// example for ACS712 : bidir = true, A0 is the sensor pin, 5.0 is the volatge board, 0.1 is the sensibility of the chip
-//ACS7XX_ALLEGRO currentSensor(true, 0, 5.0, 0.1);
+// ACS712 configuration : bidir = true, A0 is the sensor pin, 5.0 is the volatge board, 0.1 is the sensibility of the chip
+ACS7XX_ALLEGRO currentSensor(true, 0, 5.0, 0.1);
 
-// Software SPI (slower updates, more flexible pin options):
-// pin 7 - Serial clock out (SCLK)
-// pin 6 - Serial data out (DIN)
-// pin 5 - Data/Command select (D/C)
-// pin 4 - LCD chip select (CS)
-// pin 3 - LCD reset (RST)
-Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
+Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
 
-#define TRIGGER_PIN  8  // Arduino pin tied to trigger pin on the ultrasonic sensor.
-#define ECHO_PIN     14  // Arduino pin tied to echo pin on the ultrasonic sensor.
-#define MAX_DISTANCE 100 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+TimedAction  timerPomiar =	TimedAction(1000, pomiarIsr);
 
-NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
-unsigned long sensorPoziom;
 
-// 
-//MyMessage msg_acs(SENSOR_ACS_ID, V_CURRENT);
-MyMessage msg_rel(SENSOR_RELAY_ID, V_STATUS);
-MyMessage msg_dis(SENSOR_SR04_ID, V_DISTANCE);
+MyMessage msg_stop(SENSOR_STOP_ID, V_STATUS);
+MyMessage msg_pump(SENSOR_PUMP_ID, V_STATUS);
+MyMessage msg_max(SENSOR_INFO_ID, V_TEXT);
+MyMessage msg_poziom(SENSOR_WATER_ID, V_DISTANCE);
 
-TimedAction  timerPomiar =	TimedAction(5000, pomiarIsr);
-	
-int wrkMode;
+// -------------------------------------------------
 
 void before()
 {
-	expander.begin(0x20);   
-	// Then set relay pins in output mode
-    expander.pinMode(SENSOR_RELAY_PIN, OUTPUT);
-    // Set relay to last known state (using eeprom storage)
-    expander.digitalWrite(SENSOR_RELAY_PIN, loadState(SENSOR_RELAY_ID)?RELAY_ON:RELAY_OFF);
+	pinMode(PUMP_PIN, OUTPUT);
+	digitalWrite(PUMP_PIN, PUMP_OFF);	
+
+	matrix.setIntensity(0);
+	matrix.fillScreen(LOW);
+	matrix.print(">");
+	matrix.write();	
+	/*
+	// -----------------------------------------
+	// zapis startowy w pamięcie EEPROM, używane tylko podczas programowania
+	//
+	saveState(EEPROM_wrkMode, 0);
+	saveState(EEPROM_trybPracy, false);
+	saveState(EEPROM_pomiarInterwal, 1);
+	saveState(EEPROM_sensorMin, 16);
+	saveState(EEPROM_sensorMax, 6);
+	//
+	// -----------------------------------------
+	*/
+	// setup initial configuration stored in EEPROM
+	konfig.wrkMode			= loadState(EEPROM_wrkMode);
+	konfig.trybPracy		= loadState(EEPROM_trybPracy);
+	konfig.pomiarInterwal	= loadState(EEPROM_pomiarInterwal);
+	konfig.sensorMin		= loadState(EEPROM_sensorMin);
+	konfig.sensorMax		= loadState(EEPROM_sensorMax);
 }
 
-void setup()
-{
-	expander.pinMode(LED_PIN_STOP, OUTPUT);  // LED RED    - STOP
-	expander.pinMode(LED_PIN_OVER, OUTPUT);  // LED YELLOW - OVER
-	expander.pinMode(LED_PIN_PUMP, OUTPUT);  // LED GREEN  - Pump
-	expander.pinMode(LED_PIN_MEASURE, OUTPUT);  // LED WHITE  - Measure
-	expander.pullUp(5);
-	expander.pinMode(5, INPUT);   // BUTTON - MANL
-	expander.pullUp(6);
-	expander.pinMode(6, INPUT);   // BUTTON - STOP
-	expander.pinMode(LED_PIN_LCD, OUTPUT);   // Podświetlenie do LCD
-	expander.clear();
-	//expander.digitalWrite(0, LOW);
-	//expander.digitalWrite(0, LOW);
-	//expander.digitalWrite(4, HIGH);
-	//expander.blink(4, 10, 500); //(4-pin, 10-ilosc mrugniec, 500-ms każdy stan)
-
-	//currentSensor.begin();
-    //expander.digitalWrite(LED_PIN_LCD, HIGH);
-		
-	expander.enableInterrupt(2, onKeyboard);  //obsługa przerwania od PCFa
-	expander.attachInterrupt(5,onKeyStop,FALLING);
-	expander.attachInterrupt(6,onKeyManl,FALLING);
-	
-	encoder = new ClickEncoder(A2, A1, A3);	//A3 button
-	//encoder->setAccelerationEnabled(false);
-	Timer1.initialize(1000);
-	Timer1.attachInterrupt( encoderIsr );	  
-	last = encoder->getValue();
-	  
-	display.begin();
-    display.clearDisplay();
-    EkranIntro();
-	
-	wrkMode=0;
-}
+// -------------------------------------------------
 
 void presentation()
 {
-  // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Pump", "1.0");
+	// Send the sketch version information to the gateway and Controller
+	sendSketchInfo("Pump", "1.0");
 
-  present(SENSOR_RELAY_ID, S_BINARY);
-  present(SENSOR_SR04_ID, S_DISTANCE);
-  //present(SENSOR_ACS_ID, S_MULTIMETER);
+	present(SENSOR_PUMP_ID, S_BINARY);
+	present(SENSOR_STOP_ID, S_BINARY);
+	present(SENSOR_INFO_ID, S_INFO);
+	present(SENSOR_WATER_ID, S_DISTANCE);
 }
 
+// -------------------------------------------------
 
-void loop()
+void receive(const MyMessage &message)
 {
-	timerPomiar.check();
+	// We only expect one type of message from controller. But we better check anyway.
+	if (message.type==V_STATUS && message.sensor==SENSOR_STOP_ID)
+	{
+		if(konfig.wrkMode!=2 && message.getBool()==true)
+		{
+			// wejście do ekranu STOP
+			konfig.wrkMode=2;
+			timerPomiar.disable();
+			saveState(EEPROM_wrkMode, konfig.wrkMode);
+		}
+		else
+		{
+			if(konfig.wrkMode==2 && message.getBool()==false)
+			{
+				konfig.wrkMode=0;
+				timerPomiar.enable();
+				saveState(EEPROM_wrkMode, konfig.wrkMode);				
+			}
+		}
+
+	}
+	
+	if (message.type==V_STATUS && message.sensor==SENSOR_PUMP_ID)
+	{
+		if(konfig.wrkMode==0 && message.getBool()==true)
+		{	
+		//wejście jezeli sterownik w stanie pomiaru oraz COntroller zarządał włączenia pompy 
+			konfig.wrkMode=3;
+			digitalWrite(PUMP_PIN, HIGH);
+			timerPomiar.setInterval(250);
+		}
+		else
+		{
+			if(konfig.wrkMode==3 && message.getBool()==false)
+			{
+				konfig.wrkMode=0;
+				digitalWrite(PUMP_PIN, LOW);
+				timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------
+
+void setup()
+{
+	// Pump relay pins in output mode
+	// już zdefiniowane w funkcji before()
+	//
+	//pinMode(PUMP_PIN, OUTPUT);
+	//digitalWrite(PUMP_PIN, PUMP_OFF);	
+	
+	//Buttons on PCF8574 
+	expander.begin(0x20);
+	expander.pinMode(BTN_MANL, INPUT);							// BUTTON - MANL
+	expander.pullUp(BTN_MANL);
+	expander.pinMode(BTN_STOP, INPUT);							// BUTTON - STOP
+	expander.pullUp(BTN_STOP);
+	
+	pinMode(PCF_INT_PIN, INPUT);								// PIN przerwan od PCF
+	digitalWrite(PCF_INT_PIN, HIGH);
+	expander.enableInterrupt(PCF_INT_PIN, onKeyboard);			//obsługa przerwania od PCFa
+	expander.attachInterrupt(BTN_STOP, onKeyStop, FALLING);
+	expander.attachInterrupt(BTN_MANL, onKeyManl, FALLING);
+	
+	// encoder
+	encoder = new ClickEncoder(A2, A1, A3);						//A3 button
+	encoder->setAccelerationEnabled(true);
+	Timer1.initialize(1000);
+	Timer1.attachInterrupt( encoderIsr );
+	last = encoder->getValue();
+	
+	// display on LED matrix
+	matrix.setIntensity(0);
+	EkranIntro();
+	matrix.fillScreen(LOW);
+	matrix.write();
+	
+	zbiornikMax	= konfig.sensorMin - konfig.sensorMax;
+	timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+	send(msg_max.set(zbiornikMax));
+	send(msg_poziom.set(zbiornikPoziom));
+}
+
+// -------------------------------------------------
+// Główna pętla programu
+// -------------------------------------------------
+//
+void loop()
+{	
+ 	timerPomiar.check();
 
 	readRotaryEncoder();
 
@@ -197,198 +301,277 @@ void loop()
 	if (up && page == 1 )
 	{
 		up = false;
-		if(menuitem==2 && frame ==2)
-		{
-			frame--;
+		i=0;
+		if(menuitem==1)
+		{	
+			// AUTO/MANUAL
+			menuitem=2;
 		}
-		if(menuitem==3 && frame ==3)
+		else if(menuitem==2)
 		{
-			frame--;
+			// sensorMin
+			menuitem=3;
+			selectedValue = konfig.sensorMin;
 		}
-		if(menuitem==4 && frame ==4)
+		else if(menuitem==3)
 		{
-			frame--;
+			// zbiornikMax
+			menuitem=4;
+			selectedValue = zbiornikMax;			
 		}
-		if(menuitem==5 && frame ==5)
+		else if(menuitem==4)
 		{
-			frame--;
+			// pomiarInterwal
+			menuitem=5;
+			selectedValue = konfig.pomiarInterwal;	
 		}
-		if(menuitem==6 && frame ==6)
+		else if(menuitem==5)
 		{
-			frame--;
-		}
-		if(menuitem==7 && frame ==7)
-		{
-			frame--;
-		}
-		
-		lastMenuItem = menuitem;
-		menuitem--;
-		if (menuitem==0)
-		{
+			// wyjście z menu
 			menuitem=1;
-		}
-	}
-	else if (up && page == 2 && menuitem==1 ) 
-	{
-		up = false;
-		/*
-		contrast--;
-		setContrast();
-		*/
+		}		
 	}
 	else if (up && page == 2 && menuitem==2 ) 
-	{
+	{	
+		// Auto/Manual
 		up = false;
-		//volume--;
+		if(konfig.trybPracy)
+			konfig.trybPracy=false;		//Manual
+		else
+			konfig.trybPracy=true;		//Auto
 	}
 	else if (up && page == 2 && menuitem==3 ) 
 	{
+		// min value
 		up = false;
-		/*
-		selectedLanguage--;
-		if(selectedLanguage == -1)
-		{
-			selectedLanguage = 2;
-		}
-		*/
+		selectedValue++;
+		if(selectedValue > 99)
+			selectedValue=99;
 	}
 	else if (up && page == 2 && menuitem==4 ) 
 	{
+		// max value
 		up = false;
-		/*
-		selectedDifficulty--;
-		if(selectedDifficulty == -1)
-		{
-			selectedDifficulty = 1;
-		}
-		*/
+		selectedValue++;
+		if(selectedValue>99)
+			selectedValue=99;
 	}
+	else if (up && page == 2 && menuitem==5 ) 
+	{
+		// co ile sec pomiar
+		up = false;
+		selectedValue++;
+		if(selectedValue>90)
+			selectedValue=90;
+	}
+
 
 	if (down && page == 1) //We have turned the Rotary Encoder Clockwise
 	{
 		down = false;
-		if(menuitem==3 && lastMenuItem == 2)
+		i=0;
+		if(menuitem==1)
 		{
-			frame ++;
+			menuitem=5;
+			selectedValue=konfig.pomiarInterwal;			
 		}
-		else if(menuitem==4 && lastMenuItem == 3)
+		
+		else if(menuitem==2)
 		{
-			frame ++;
+			menuitem=1;
 		}
-		else if(menuitem==5 && lastMenuItem == 4)
+		
+		else if(menuitem==3)
 		{
-			frame ++;
+			menuitem=2;
+			selectedValue = konfig.sensorMin;
 		}
-		else if(menuitem==6 && lastMenuItem == 5)
+		
+		else if(menuitem==4)
 		{
-			frame ++;
+			// min value poziom w zbiorniku
+			menuitem=3;
+			selectedValue = konfig.sensorMin;
 		}
-		else if(menuitem==7 && lastMenuItem == 6)
+		
+		else if(menuitem==5)
 		{
-			frame ++;
+			// max value poziom w zbiorniku
+			menuitem=4;
+			selectedValue = zbiornikMax;			
 		}
-		else if(menuitem==8 && lastMenuItem == 7 && frame!=7)
-		{
-			frame ++;
-		}
-				
-		lastMenuItem = menuitem;
-		menuitem++;
-		if (menuitem==10)
-		{
-			menuitem--;
-		}
-	}
-	else if (down && page == 2 && menuitem==1) 
-	{
-		down = false;
-		/*
-		contrast++;
-		setContrast();
-		*/
 	}
 	else if (down && page == 2 && menuitem==2) 
 	{
+		// Auto/Manual
 		down = false;
-		//volume++;
+		if(konfig.trybPracy)
+			konfig.trybPracy=false;	//Manual
+		else
+			konfig.trybPracy=true;		//Auto
 	}
-	else if (down && page == 2 && menuitem==3 ) 
+	else if (down && page == 2 && menuitem==3) 
 	{
+		// min value poziom w zbiorniku
 		down = false;
-		/*
-		selectedLanguage++;
-		if(selectedLanguage == 3)
-		{
-			selectedLanguage = 0;
-		}
-		*/
+		selectedValue--;
+		if(selectedValue < 2)	// SR04 realizuje pomiar od 2 cm
+			selectedValue=2;
 	}
 	else if (down && page == 2 && menuitem==4 ) 
 	{
+		// max value
 		down = false;
-		/*
-		selectedDifficulty++;
-		if(selectedDifficulty == 2)
-		{
-			selectedDifficulty = 0;
-		}
-		*/
+		selectedValue--;
+		if(selectedValue < 2)	// nie moze być mniejsze od min
+			selectedValue=2;
+	}
+	else if (down && page == 2 && menuitem==5 ) 
+	{
+		// co ile sec pomiar
+		down = false;
+		selectedValue--;
+		if(selectedValue < 1)
+			selectedValue=1;
 	}
  	
-	if (middle) //Rotarry Middle Button is Pressed
+	// Rottary Middle Button is pressed - PROG state
+	if (middle) 
 	{
 		middle = false;
 		
-		if(wrkMode!=1)
-			wrkMode=1;
+		if(konfig.wrkMode!=4)
+		{
+			//wejscie do menu
+			konfig.wrkMode=4;	
+			page=1;
+			menuitem=1;
+		}
 		else
 		{							
-			if(page == 1 && menuitem == 1)
-				wrkMode=0;
-			
-			if (page == 1 && menuitem == 6) // Backlight Control
+			if(page == 1 && menuitem == 1)	// wyjscie z menu		
 			{
-				if (backlight)
-				{
-					backlight = false;
-					menuItem6 = "Light: OFF";
-					//turnBacklightOff();
-				}
-				else
-				{
-					backlight = true;
-					menuItem6 = "Light: ON";
-					//turnBacklightOn();
-				}
+				konfig.wrkMode=0;
+				timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+			}
+			else if (page == 1 && menuitem == 2) 
+			{
+				// Auto/Manual
+				page=2;
+			}
+			else if(page == 1 && menuitem == 3)	
+			{
+				// min value
+				// set sensorMin
+				page=2;
+			}
+			
+			else if(page == 1 && menuitem == 4)	
+			{
+				// max value
+				// set sensorMax
+				page=2;
 			}
 
-			if(page == 1 && menuitem == 8)// Reset
+			else if(page == 1 && menuitem == 5)	
 			{
-				resetDefaults();
-			}
+				// co ile min pomiar
+				page=2;
+			}	
 			
-			if(page == 2 && menuitem == 9)// About
+			else if(page==2)
 			{
-				page=1;
+				// zapisujemy parametry i wracamy do głównego menu
+				switch(menuitem)
+				{
+					case 2:	// ustawienie Auto/Manual
+						saveState(EEPROM_trybPracy, konfig.trybPracy);
+						break;
+					
+					case 3:	// ustawienie sensorMin
+						konfig.sensorMin = selectedValue;
+						saveState(EEPROM_sensorMin, konfig.sensorMin);
+						break;
+					
+					case 4:	// ustawienie sensorMax
+						konfig.sensorMax = konfig.sensorMin - selectedValue;
+						zbiornikMax	= selectedValue;
+						saveState(EEPROM_sensorMax, konfig.sensorMax);
+						send(msg_max.set(zbiornikMax));
+						break;
+					
+					case 5:	// ustawienie pomiarInterwal
+						konfig.pomiarInterwal=selectedValue;
+						saveState(EEPROM_pomiarInterwal, selectedValue);
+				}
+				page=1;				
 			}
 		}
 	}	// koniec obsługi funkcji po naciśnięciu przycisku Rottary
- 
-	switch(wrkMode)
+
+	switch(konfig.wrkMode)
 	{
 		case 0:
-		// TRYB AUTO, PUMP OFF
-		 EkranPomiar(true, false, false);
-		 break;
-	 
-		 case 1:
-		 // menu
-		 EkranMenu();
-		 break;
-	 
-		 case 2:
-		 EkranStop();
+			// tryb pracy POMIAR
+			if(zbiornikPoziom>zbiornikMax)
+			{
+				// wchodzimy gdy został przekroczony poziom do wypompowania
+				// tryb pracy POMIAR / przekroczenie poziomu
+				if(konfig.trybPracy)
+				{
+					// wchodzimy gdy został przekroczony poziom do wypompowania i jesteśmy w trybi AUTO
+					// tryb pracy POMIAR / przekroczenie poziomu  / AUTO pompa
+					// wrkMode 0,3 realizują histereze pompy dla trybu Auto
+					konfig.wrkMode=3;
+					digitalWrite(PUMP_PIN, HIGH);
+					timerPomiar.setInterval(250);
+					send(msg_pump.set(true));						
+				}	
+				else
+					// tryb pracy POMIAR / przekroczenie poziomu  / MANUAL pompa
+					EkranPomiar(true, false, false);							
+			}
+			else
+				EkranPomiar(false, false, false);
+			
+			if(zbiornikPoziom_l!=zbiornikPoziom)
+			{
+				zbiornikPoziom_l=zbiornikPoziom;
+				send(msg_poziom.set(zbiornikPoziom));
+			}
+
+			break;
+	 	
+		case 1:
+			selectedValue = sensorPoziom;
+			EkranMenu();
+			break;
+		 
+		case 2:
+			EkranStop();
+			break;
+		 		
+		case 3:
+			// wchodzimy gdy został przekroczony poziom do wypompowania
+			if(zbiornikPoziom<=0)
+			{
+				// wchodzimy jeżeli woda została wypompowana
+				konfig.wrkMode=0;
+				digitalWrite(PUMP_PIN, LOW);
+				timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+				send(msg_pump.set(false));
+			}
+			// sprawdzenia w trybie MANUAL
+			if(zbiornikPoziom>zbiornikMax)
+				// pokaż OVERFLOW, pompa włączona
+				EkranPomiar(true, false, true);			
+			else
+				// pompa włączona
+				EkranPomiar(false, false, true);
+			break;
+		
+		case 4:
+				EkranMenu();
 	}
   
   /*
@@ -407,38 +590,19 @@ void loop()
   //send(msg_dis.set(distance,2));  
 }
 
-void receive(const MyMessage &message)
-{
-  // We only expect one type of message from controller. But we better check anyway.
-  if (message.type==V_STATUS) 
-  {
-    // Change relay state
-    expander.digitalWrite(SENSOR_RELAY_PIN, message.getBool()?RELAY_ON:RELAY_OFF);
-    expander.digitalWrite(LED_PIN_PUMP, message.getBool()?RELAY_ON:RELAY_OFF);
-	// Store state in eeprom
-    saveState(SENSOR_RELAY_ID, message.getBool());
-    // Write some debug info
-    //Serial.print("Incoming change for sensor:");
-    //Serial.print(message.sensor);
-    //Serial.print(", New status: ");
-    //Serial.println(message.getBool());
-  }
-}
-
 void pomiarIsr()
 {
-	// migniemy LED MEASURE
-	expander.digitalWrite(LED_PIN_MEASURE, HIGH);   // turn the LED on (HIGH is the voltage level)
-	delay(5);
-	expander.digitalWrite(LED_PIN_MEASURE, LOW);    // turn the LED off by making the voltage LOW
+	blinkPomiar=true;
+		
+	sensorPoziom = 	sonar.convert_cm(sonar.ping_median(3));	//sonar.ping_cm();
 
-	sensorPoziom = sonar.ping_cm();
+	if( konfig.sensorMin < sensorPoziom)
+		zbiornikPoziom = 0;
+	else
+		zbiornikPoziom = konfig.sensorMin - sensorPoziom;
+	
 	//send(msg_dis.set(sensorPoziom));
-}
-
-void resetDefaults()
-{
-	menuItem5 = "Light: ON";
+	//delay(5);
 }
 
 // -------------------------------------------------
@@ -458,13 +622,81 @@ void readRotaryEncoder()
 	if (value/2 > last) 
 	{
 		last = value/2;
-		down = true;
+		up = true;
 		delay(150);
 	}
 	else if (value/2 < last) 
 	{
 		last = value/2;
-		up = true;
+		down = true;
 		delay(150);
 	}
+}
+
+// -------------------------------------------------
+// Keyboard
+// -------------------------------------------------
+//
+
+void onKeyboard()
+{
+	expander.checkForInterrupt();
+}
+
+void onKeyStop()
+{
+	if(konfig.wrkMode!=2)
+	{
+		// wejście do ekranu STOP
+		konfig.wrkMode=2;
+		timerPomiar.disable();
+		saveState(EEPROM_wrkMode, konfig.wrkMode);
+		send(msg_stop.set(true));
+	}
+	else
+	{
+		konfig.wrkMode=0;
+		timerPomiar.enable();
+		saveState(EEPROM_wrkMode, konfig.wrkMode);
+		send(msg_stop.set(false));
+	}
+}
+
+void onKeyManl()
+{
+	 switch(konfig.wrkMode)
+	 {
+		case 0:
+			//przycisk MANL zostal nacisniety, wchodzimy pierwszy raz, czyli wlaczamy pompe
+			expander.attachInterrupt(BTN_MANL, onKeyManl, CHANGE);
+			digitalWrite(PUMP_PIN, HIGH);
+			konfig.wrkMode = 3;
+			timerPomiar.setInterval(250);
+			break;
+		
+		case 1:
+			expander.attachInterrupt(BTN_MANL, onKeyManl, FALLING);
+			digitalWrite(PUMP_PIN, LOW);
+			timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+			konfig.wrkMode = 4;
+			break;
+		
+		case 3:
+			// przycisk MANL zostal zwolniony, czyli wyłączmy pompe
+			expander.attachInterrupt(BTN_MANL, onKeyManl, FALLING);
+			digitalWrite(PUMP_PIN, LOW);
+			timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+			konfig.wrkMode = 0;
+			break;
+			
+		case 4:
+			if(page==2 && menuitem==3)
+			{
+				// wchodzimy jeżeli jesteśmy w menu, oraz w trybie ustawiania min		
+				expander.attachInterrupt(BTN_MANL, onKeyManl, CHANGE);
+				digitalWrite(PUMP_PIN, HIGH);
+				konfig.wrkMode = 1;
+				timerPomiar.setInterval(250);
+			}
+	 }
 }

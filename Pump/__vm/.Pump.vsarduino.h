@@ -10,7 +10,6 @@
 
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
-#define _VMDEBUG 1
 #define ARDUINO 10804
 #define ARDUINO_MAIN
 #define F_CPU 16000000L
@@ -20,26 +19,22 @@
 #define ARDUINO_AVR_UNO
 #define ARDUINO_ARCH_AVR
 void before();
-//
 void presentation();
-//
 void receive(const MyMessage &message);
-void pomiarIsr();
-void resetDefaults();
+//
+//
 void encoderIsr();
 void readRotaryEncoder();
-void EkranIntro();
-void EkranStop();
-void EkranMenu();
-void displayMenuItem(String item, int position, boolean selected);
-void displayStringMenuPage(String menuItem, String value);
-void EkranPomiar(boolean oAUTO, boolean oMANL, boolean oPOMP);
 void onKeyboard();
 void onKeyStop();
 void onKeyManl();
+void EkranIntro();
+void EkranStop();
+void EkranMenu();
+void displayStringMenu(String menuTekst);
+void EkranPomiar(boolean oOver, boolean oMANL, boolean oPOMP);
 
 #include "pins_arduino.h" 
 #include "Arduino.h"
 #include "Pump.ino"
 #include "ekrany.ino"
-#include "keyboard.ino"
