@@ -19,12 +19,10 @@
  *******************************
  *
  * REVISION HISTORY
- * Version 1.0 - Henrik Ekblad
+ * 9/10/2017 Version 1.0 - Krzysztof Furmaniak
  *
  * DESCRIPTION
- * Example sketch showing how to control physical relays.
- * This example will remember relay state after power failure.
- * http://www.mysensors.org/build/relay
+ *
  */
 
 // --------------------------------------------------------

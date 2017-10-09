@@ -19,7 +19,7 @@
  *******************************
  *
  * REVISION HISTORY
- * Version 1.0 - Krzysztof Furmaniak
+ * 9/10/2017 Version 1.0 - Krzysztof Furmaniak
  *
  * DESCRIPTION
  *
@@ -138,7 +138,6 @@ Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVe
 
 TimedAction  timerPomiar =	TimedAction(1000, pomiarIsr);
 
-
 MyMessage msg_stop(SENSOR_STOP_ID, V_STATUS);
 MyMessage msg_pump(SENSOR_PUMP_ID, V_STATUS);
 MyMessage msg_max(SENSOR_INFO_ID, V_TEXT);
@@ -167,12 +166,6 @@ void before()
 	//
 	// -----------------------------------------
 	*/
-	// setup initial configuration stored in EEPROM
-	konfig.wrkMode			= loadState(EEPROM_wrkMode);
-	konfig.trybPracy		= loadState(EEPROM_trybPracy);
-	konfig.pomiarInterwal	= loadState(EEPROM_pomiarInterwal);
-	konfig.sensorMin		= loadState(EEPROM_sensorMin);
-	konfig.sensorMax		= loadState(EEPROM_sensorMax);
 }
 
 // -------------------------------------------------
@@ -199,6 +192,7 @@ void receive(const MyMessage &message)
 		{
 			// wejście do ekranu STOP
 			konfig.wrkMode=2;
+			digitalWrite(PUMP_PIN, LOW);
 			timerPomiar.disable();
 			saveState(EEPROM_wrkMode, konfig.wrkMode);
 		}
@@ -208,6 +202,7 @@ void receive(const MyMessage &message)
 			{
 				konfig.wrkMode=0;
 				timerPomiar.enable();
+				timerPomiar.setInterval(konfig.pomiarInterwal*1000);
 				saveState(EEPROM_wrkMode, konfig.wrkMode);				
 			}
 		}
@@ -270,6 +265,15 @@ void setup()
 	EkranIntro();
 	matrix.fillScreen(LOW);
 	matrix.write();
+	
+		// setup initial configuration stored in EEPROM
+	konfig.wrkMode			= loadState(EEPROM_wrkMode);
+	konfig.trybPracy		= loadState(EEPROM_trybPracy);
+	konfig.pomiarInterwal	= loadState(EEPROM_pomiarInterwal);
+	konfig.sensorMin		= loadState(EEPROM_sensorMin);
+	konfig.sensorMax		= loadState(EEPROM_sensorMax);
+		
+	pomiarIsr();
 	
 	zbiornikMax	= konfig.sensorMin - konfig.sensorMax;
 	timerPomiar.setInterval(konfig.pomiarInterwal*1000);
@@ -599,9 +603,6 @@ void pomiarIsr()
 		zbiornikPoziom = 0;
 	else
 		zbiornikPoziom = konfig.sensorMin - sensorPoziom;
-	
-	//send(msg_dis.set(sensorPoziom));
-	//delay(5);
 }
 
 // -------------------------------------------------
@@ -648,6 +649,8 @@ void onKeyStop()
 	{
 		// wejście do ekranu STOP
 		send(msg_stop.set(true));
+		send(msg_pump.set(false));
+		digitalWrite(PUMP_PIN, LOW);
 		konfig.wrkMode=2;
 		timerPomiar.disable();
 		saveState(EEPROM_wrkMode, konfig.wrkMode);
@@ -657,6 +660,7 @@ void onKeyStop()
 		send(msg_stop.set(false));
 		konfig.wrkMode=0;
 		timerPomiar.enable();
+		timerPomiar.setInterval(konfig.pomiarInterwal*1000);
 		saveState(EEPROM_wrkMode, konfig.wrkMode);
 	}
 }
