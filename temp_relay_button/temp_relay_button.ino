@@ -19,7 +19,7 @@
  ****************************************************
  *
  * REVISION HISTORY
- * ver 1.0
+ * ver 1.1
  * Created by Krzysztof Furmaniak
  * Copyright (C) February 2017 Krzysztof Furmaniak
  * 
@@ -31,6 +31,7 @@
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
 //#define MY_RADIO_RFM69
+#define MY_RF24_PA_LEVEL RF24_PA_HIGH
 
 // Enable repeater functionality for this node
 #define MY_REPEATER_FEATURE
@@ -42,20 +43,20 @@
 
 #define COMPARE_TEMP 1 // Send temperature only if changed? 1 = Yes 0 = No
 #define ONE_WIRE_BUS 8 // Pin where dallase sensor is connected 
-#define MAX_ATTACHED_DS18B20 3
-unsigned long SLEEP_TIME = 300000; // Sleep time between reads (in milliseconds) 5min
+#define MAX_ATTACHED_DS18B20 1
 
-#define RELAY_PIN  3    // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
-#define CHILD_ID 1   // Id of the sensor child
-#define RELAY_ON 1    // GPIO value to write to turn on attached relay
-#define RELAY_OFF 0   // GPIO value to write to turn off attached relay
-#define LED_PIN 4         // GPIO value to write to turn off attached relay
-#define BUTTON_PIN 5  // Arduino Digital I/O pin number for button
+#define RELAY_PIN	4    // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
+#define CHILD_ID	1		// Id of Relay the sensor child
+#define RELAY_ON	1		// GPIO value to write to turn on attached relay
+#define RELAY_OFF	0		// GPIO value to write to turn off attached relay
+#define LED_PIN		7       // GPIO value to write to turn off attached relay
+#define BUTTON_PIN	3	// Arduino Digital I/O pin number for button
 
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature. 
 float lastTemperature[MAX_ATTACHED_DS18B20];
-int numSensors=0;
+const unsigned long interval = 300000; //ms, 5min
+int numSensors=1;
 bool receivedConfig = false;
 bool metric = true;
 
@@ -63,12 +64,13 @@ int oldValue=0;
 bool state;
 
 unsigned long previousMillis = 0;
-const long interval = 300000; //ms, 5min
 
 // Initialize temperature message
 MyMessage msg_temp(0,V_TEMP);
+
 // Initialize relay message
 MyMessage msg(CHILD_ID, V_LIGHT);
+
 
 void before()
 {
@@ -78,32 +80,33 @@ void before()
 
 void setup()
 {
-  pinMode(LED_PIN, OUTPUT);
-  
-    // Setup the button
-  pinMode(BUTTON_PIN,INPUT);
-  // Activate internal pull-up
-  digitalWrite(BUTTON_PIN,HIGH);
+	// LED for Relay switch on/off
+	pinMode(LED_PIN, OUTPUT);
+	
+	// Setup the button
+	pinMode(BUTTON_PIN,INPUT);
+	// Activate internal pull-up
+	digitalWrite(BUTTON_PIN,HIGH);
 
-   // Make sure relays are off when starting up
-  digitalWrite(RELAY_PIN, RELAY_OFF);
-  // Then set relay pins in output mode
-  pinMode(RELAY_PIN, OUTPUT);   
+	// Then set relay pins in output mode
+	pinMode(RELAY_PIN, OUTPUT);
+	// Make sure relays are off when starting up
+	digitalWrite(RELAY_PIN, RELAY_OFF);
 
-  // Set relay to last known state (using eeprom storage) 
-  state = loadState(CHILD_ID);
-  digitalWrite(RELAY_PIN, state?RELAY_ON:RELAY_OFF);
-  
-  digitalWrite(LED_PIN, state?RELAY_ON:RELAY_OFF);
+	// Set relay to last known state (using eeprom storage)
+	state = loadState(CHILD_ID);
+	digitalWrite(RELAY_PIN, state?RELAY_ON:RELAY_OFF);
+	
+	digitalWrite(LED_PIN, state?RELAY_ON:RELAY_OFF);
 
-  // requestTemperatures() will not block current thread
-  sensors.setWaitForConversion(false);
+	// requestTemperatures() will not block current thread
+	sensors.setWaitForConversion(false);
 }
 
 void presentation()
 {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Relay & Button & Temp", "1.0");
+  sendSketchInfo("Triac & Button & Temp", "1.1");
 
   // Register all sensors to gw (they will be created as child devices)
   present(0, S_TEMP);
@@ -115,6 +118,8 @@ void loop()
 { 
   int value = digitalRead(BUTTON_PIN);
   
+  unsigned long currentMillis = millis();
+  
   if (value != oldValue && value==0) 
    {
       send(msg.set(state?false:true), true); // Send new state and request ack back
@@ -122,12 +127,10 @@ void loop()
   
   oldValue = value;
 
-  unsigned long currentMillis = millis();
-
    if (currentMillis - previousMillis >= interval) 
-   {    
+   {        
      // save the last time you blinked the LED
-        previousMillis = currentMillis;
+      previousMillis = currentMillis;
         
       // Fetch temperatures from Dallas sensors
       sensors.requestTemperatures();
@@ -136,28 +139,31 @@ void loop()
       int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
       // sleep() call can be replaced by wait() call if node need to process incoming messages (or if node is repeater)
       sleep(conversionTime);
-       // Fetch and round temperature to one decimal
-      float temperature = static_cast<float>(static_cast<int>((getControllerConfig().isMetric?sensors.getTempCByIndex(0):sensors.getTempFByIndex(0)) * 10.)) / 10.;
+
+      // Read temperatures and send them to controller 
+      for (int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++) 
+      {
+           // Fetch and round temperature to one decimal
+          float temperature = static_cast<float>(static_cast<int>((getControllerConfig().isMetric?sensors.getTempCByIndex(i):sensors.getTempFByIndex(i)) * 10.)) / 10.;
     
-      // Only send data if temperature has changed and no error
-      #if COMPARE_TEMP == 1
-        if (lastTemperature[0] != temperature && temperature != -127.00 && temperature != 85.00) 
-          {
-      #else
-        if (temperature != -127.00 && temperature != 85.00) 
-          {
-      #endif
+          // Only send data if temperature has changed and no error
+          #if COMPARE_TEMP == 1
+             if (lastTemperature[i] != temperature && temperature != -127.00 && temperature != 85.00)
+              {
+          #else
+            if (temperature != -127.00 && temperature != 85.00
+              {
+          #endif
 
-            // Send in the new temperature
-            send(msg_temp.setSensor(0).set(temperature,1));
-            // Save new temperatures for next compare
-            lastTemperature[0]=temperature;
-         }
-        else
-          sendHeartbeat();  
-
- 
-   }
+                // Send in the new temperature
+                send(msg_temp.setSensor(i+1).set(temperature,1));
+                // Save new temperatures for next compare
+                lastTemperature[i]=temperature;
+              }
+            else
+              sendHeartbeat();                
+        }
+      }
 }
 
 void receive(const MyMessage &message)
@@ -174,6 +180,6 @@ void receive(const MyMessage &message)
      // Store state in eeprom
      saveState(CHILD_ID, state);
 
-    digitalWrite(LED_PIN, state?RELAY_ON:RELAY_OFF);
+     digitalWrite(LED_PIN, state?RELAY_ON:RELAY_OFF);
    } 
 }

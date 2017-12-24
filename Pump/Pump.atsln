@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Pump", "Pump.cppproj", "{F31073B4-55CD-4C64-987C-84AA71256822}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F31073B4-55CD-4C64-987C-84AA71256822}.Debug|AVR.ActiveCfg = Debug|AVR
+		{F31073B4-55CD-4C64-987C-84AA71256822}.Debug|AVR.Build.0 = Debug|AVR
+		{F31073B4-55CD-4C64-987C-84AA71256822}.Release|AVR.ActiveCfg = Release|AVR
+		{F31073B4-55CD-4C64-987C-84AA71256822}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -24,7 +24,7 @@
  * Copyright (C) February 2017 Krzysztof Furmaniak
  * 
  */
-
+//#define F_CPU 8000000UL
 
 // Enable debug prints to serial monitor
 //#define MY_DEBUG 
@@ -33,54 +33,51 @@
 #define MY_RADIO_NRF24
 //#define MY_RADIO_RFM69
 
-
-
-#include <SPI.h>
-#include <DallasTemperature.h>
+//#include <SPI.h>
+#include <MySensors.h>
 #include <OneWire.h>
+#include <DallasTemperature.h>
 
-#include <MySensors.h>  
 
-#define COMPARE_TEMP 1 // Send temperature only if changed? 1 = Yes 0 = No
+#define COMPARE_TEMP			1 // Send temperature only if changed? 1 = Yes 0 = No
+#define ONE_WIRE_BUS			8 // Pin where dallase sensor is connected 
+#define MAX_ATTACHED_DS18B20	3 // max attached sensors
 
-#define ONE_WIRE_BUS 8 // Pin where dallase sensor is connected 
-#define MAX_ATTACHED_DS18B20 3
-unsigned long SLEEP_TIME = 300000; // Sleep time between reads (in milliseconds) 5min
+unsigned long SLEEP_TIME	= 10000;	// Sleep time between reads (in milliseconds) 600000 = 10min; 10000 = 10sec
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature. 
+DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
 float lastTemperature[MAX_ATTACHED_DS18B20];
-int numSensors=0;
-bool receivedConfig = false;
-bool metric = true;
+int numSensors				= 0;
+bool receivedConfig			= false;
+bool metric					= true;
+int BATTERY_SENSE_PIN		= A0;		// select the input pin for the battery sense point
+int oldBatteryPcnt			= 0;
 
-int BATTERY_SENSE_PIN = A0;  // select the input pin for the battery sense point
-int oldBatteryPcnt = 0;
 
 // Initialize temperature message
-MyMessage msg(0,V_TEMP);
+MyMessage msg_temp(0, V_TEMP);
 
 void before()
 {
   // Startup up the OneWire library
-  sensors.begin();
+	sensors.begin();  
 }
 
 void setup()  
 { 
-      // use the 1.1 V internal reference
-#if defined(__AVR_ATmega2560__)
+    // use the 1.1 V internal reference
+    #if defined(__AVR_ATmega2560__)
     analogReference(INTERNAL1V1);
-#else
+    #else
     analogReference(INTERNAL);
-#endif
-
-  // requestTemperatures() will not block current thread
-  sensors.setWaitForConversion(false);
+    #endif
+	//sensors.setWaitForConversion(false);
+	sensors.setWaitForConversion(false);
 }
 
 void presentation() {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Temp+Battery Meter", "1.0");
+  sendSketchInfo("Temp+Battery Meter", "2.0");
 
   // Fetch the number of attached temperature sensors  
   numSensors = sensors.getDeviceCount();
@@ -93,23 +90,18 @@ void presentation() {
 
 void loop()     
 {     
-      // get the battery Voltage
-    int sensorValue = analogRead(BATTERY_SENSE_PIN);
-    int batteryPcnt = sensorValue / 10;
+	// get the battery Voltage
+    //int sensorValue = analogRead(BATTERY_SENSE_PIN);
+    //int batteryPcnt = sensorValue / 10;
       
-  // Fetch temperatures from Dallas sensors
-  sensors.requestTemperatures();
-
-  // query conversion time and sleep until conversion completed
-  int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
-  // sleep() call can be replaced by wait() call if node need to process incoming messages (or if node is repeater)
-  sleep(conversionTime);
-
-  // Read temperatures and send them to controller 
-  for (int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++) {
+	// Fetch temperatures from Dallas sensors
+	sensors.requestTemperatures();
+  
+	// Read temperatures and send them to controller 
+	for (int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++) {
 
     // Fetch and round temperature to one decimal
-    float temperature = static_cast<float>(static_cast<int>((getControllerConfig().isMetric?sensors.getTempCByIndex(i):sensors.getTempFByIndex(i)) * 10.)) / 10.;
+    float temperature = sensors.getTempCByIndex(i);
 
     // Only send data if temperature has changed and no error
     #if COMPARE_TEMP == 1
@@ -119,19 +111,19 @@ void loop()
     #endif
 
       // Send in the new temperature
-      send(msg.setSensor(i).set(temperature,1));
+      send(msg_temp.setSensor(i).set(temperature,1));
       // Save new temperatures for next compare
       lastTemperature[i]=temperature;
     }
     else
       sendHeartbeat();
-  }
-    if (oldBatteryPcnt != batteryPcnt) {
+    }
+    /*
+	if (oldBatteryPcnt != batteryPcnt) {
         // Power up radio after sleep
         sendBatteryLevel(batteryPcnt);
         oldBatteryPcnt = batteryPcnt;
     }
-    
+    */
   sleep(SLEEP_TIME);
 }
-
