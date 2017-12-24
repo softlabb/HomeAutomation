@@ -29,19 +29,14 @@
 #define F_CPU 1600000UL
 #endif
 
-#define RADIO 0
-
-
-
-#ifdef RADIO
+/* ################## RADIO
 // Enable debug prints to serial monitor
 //#define MY_DEBUG
 #define MY_RADIO_NRF24
 #define MY_REPEATER_FEATURE
 	
 #include <MySensors.h>
-#endif
-
+ ################## RADIO */
 
 #include <Adafruit_GFX.h>
 #include <Max72xxPanel.h>
@@ -53,6 +48,8 @@
 #include <TimedAction.h>
 #include <Timelib.h>
 #include <ACS7xx_Allegro.h>
+#include <avr/wdt.h>
+#include <EEPROM.h>
 
 #define PUMP_PIN				8       // Arduino Digital I/O pin number
 #define PUMP_ON					1       
@@ -92,7 +89,7 @@ int width						= 5 + spacer; // The font width is 5 pixels
 unsigned long lastt				= 0;
 unsigned long lat				= 0;
 boolean blinkPomiar;
-
+int autoStop					= 0;
 // Encoder
 unsigned int selectedValue;
 boolean up						= false;
@@ -138,34 +135,35 @@ Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVe
 
 TimedAction  timerPomiar =	TimedAction(1000, pomiarIsr);
 
+/* ################## RADIO
 MyMessage msg_stop(SENSOR_STOP_ID, V_STATUS);
 MyMessage msg_pump(SENSOR_PUMP_ID, V_STATUS);
 MyMessage msg_max(SENSOR_INFO_ID, V_TEXT);
 MyMessage msg_poziom(SENSOR_WATER_ID, V_DISTANCE);
-
+ 
 // -------------------------------------------------
 
 void before()
 {
 	pinMode(PUMP_PIN, OUTPUT);
-	digitalWrite(PUMP_PIN, PUMP_OFF);	
+	digitalWrite(PUMP_PIN, PUMP_OFF);
 
 	matrix.setIntensity(0);
 	matrix.fillScreen(LOW);
 	matrix.print(">");
-	matrix.write();	
-	/*
+	matrix.write();
+
 	// -----------------------------------------
 	// zapis startowy w pamięcie EEPROM, używane tylko podczas programowania
 	//
-	saveState(EEPROM_wrkMode, 0);
-	saveState(EEPROM_trybPracy, false);
-	saveState(EEPROM_pomiarInterwal, 1);
-	saveState(EEPROM_sensorMin, 16);
-	saveState(EEPROM_sensorMax, 6);
+	//saveState(EEPROM_wrkMode, 0);
+	//saveState(EEPROM_trybPracy, false);
+	//saveState(EEPROM_pomiarInterwal, 1);
+	//saveState(EEPROM_sensorMin, 16);
+	//saveState(EEPROM_sensorMax, 6);
 	//
 	// -----------------------------------------
-	*/
+	
 }
 
 // -------------------------------------------------
@@ -230,16 +228,28 @@ void receive(const MyMessage &message)
 	}
 }
 
+################## RADIO */
+
 // -------------------------------------------------
 
 void setup()
 {
+	wdt_enable(WDTO_2S);	// ustawienie WATCHDOG na 2sec
+	
 	// Pump relay pins in output mode
-	// już zdefiniowane w funkcji before()
+	// zdefiniowane w funkcji before() jeżeli mamy radio, wtedy poniższe zablokować
+	// jeżeli nie ma radia tutaj musimy to wpisać
 	//
 	//pinMode(PUMP_PIN, OUTPUT);
 	//digitalWrite(PUMP_PIN, PUMP_OFF);	
-	
+	pinMode(PUMP_PIN, OUTPUT);
+	digitalWrite(PUMP_PIN, PUMP_OFF);
+
+	matrix.setIntensity(0);
+	matrix.fillScreen(LOW);
+	matrix.print(">");
+	matrix.write();
+
 	//Buttons on PCF8574 
 	expander.begin(0x20);
 	expander.pinMode(BTN_MANL, INPUT);							// BUTTON - MANL
@@ -266,19 +276,35 @@ void setup()
 	matrix.fillScreen(LOW);
 	matrix.write();
 	
+	wdt_reset();	// kasowanie WATCHDOG
+	
+	// -----------------------------------------
+	// zapis startowy w pamięcie EEPROM, używane tylko podczas programowania
+	//
+	//EEPROM.write(EEPROM_wrkMode, 0);//saveState(EEPROM_wrkMode, 0);
+	//EEPROM.write(EEPROM_trybPracy, false);//saveState(EEPROM_trybPracy, false);
+	//EEPROM.write(EEPROM_pomiarInterwal, 1);//saveState(EEPROM_pomiarInterwal, 1);
+	//EEPROM.write(EEPROM_sensorMin, 18);//saveState(EEPROM_sensorMin, 16);
+	//EEPROM.write(EEPROM_sensorMax, 8);//saveState(EEPROM_sensorMax, 8);
+	//
+	// -----------------------------------------
 		// setup initial configuration stored in EEPROM
-	konfig.wrkMode			= loadState(EEPROM_wrkMode);
-	konfig.trybPracy		= loadState(EEPROM_trybPracy);
-	konfig.pomiarInterwal	= loadState(EEPROM_pomiarInterwal);
-	konfig.sensorMin		= loadState(EEPROM_sensorMin);
-	konfig.sensorMax		= loadState(EEPROM_sensorMax);
-		
+	konfig.wrkMode			= EEPROM.read(EEPROM_wrkMode);//loadState(EEPROM_wrkMode);
+	konfig.trybPracy		= EEPROM.read(EEPROM_trybPracy);//loadState(EEPROM_trybPracy);
+	konfig.pomiarInterwal	= EEPROM.read(EEPROM_pomiarInterwal);//loadState(EEPROM_pomiarInterwal);
+	konfig.sensorMin		= EEPROM.read(EEPROM_sensorMin);//loadState(EEPROM_sensorMin);
+	konfig.sensorMax		= EEPROM.read(EEPROM_sensorMax);//loadState(EEPROM_sensorMax);
+
 	pomiarIsr();
 	
 	zbiornikMax	= konfig.sensorMin - konfig.sensorMax;
 	timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+	/* ################## RADIO
+	
 	send(msg_max.set(zbiornikMax));
 	send(msg_poziom.set(zbiornikPoziom));
+	
+	################## RADIO */
 }
 
 // -------------------------------------------------
@@ -287,7 +313,9 @@ void setup()
 //
 void loop()
 {	
- 	timerPomiar.check();
+ 	wdt_reset();	// kasowanie WATCHDOG
+	 
+	timerPomiar.check();
 
 	readRotaryEncoder();
 
@@ -376,8 +404,8 @@ void loop()
 		i=0;
 		if(menuitem==1)
 		{
-			menuitem=5;
-			selectedValue=konfig.pomiarInterwal;			
+			menuitem		= 5;
+			selectedValue	= konfig.pomiarInterwal;			
 		}
 		
 		else if(menuitem==2)
@@ -387,22 +415,22 @@ void loop()
 		
 		else if(menuitem==3)
 		{
-			menuitem=2;
-			selectedValue = konfig.sensorMin;
+			menuitem		= 2;
+			selectedValue	= konfig.sensorMin;
 		}
 		
 		else if(menuitem==4)
 		{
 			// min value poziom w zbiorniku
-			menuitem=3;
-			selectedValue = konfig.sensorMin;
+			menuitem		= 3;
+			selectedValue	= konfig.sensorMin;
 		}
 		
 		else if(menuitem==5)
 		{
 			// max value poziom w zbiorniku
-			menuitem=4;
-			selectedValue = zbiornikMax;			
+			menuitem		= 4;
+			selectedValue	= zbiornikMax;			
 		}
 	}
 	else if (down && page == 2 && menuitem==2) 
@@ -447,9 +475,9 @@ void loop()
 		if(konfig.wrkMode!=4)
 		{
 			//wejscie do menu
-			konfig.wrkMode=4;	
-			page=1;
-			menuitem=1;
+			konfig.wrkMode	= 4;	
+			page			= 1;
+			menuitem		= 1;
 		}
 		else
 		{							
@@ -489,24 +517,28 @@ void loop()
 				switch(menuitem)
 				{
 					case 2:	// ustawienie Auto/Manual
-						saveState(EEPROM_trybPracy, konfig.trybPracy);
+						EEPROM.write(EEPROM_trybPracy, konfig.trybPracy);//saveState(EEPROM_trybPracy, konfig.trybPracy);
 						break;
 					
 					case 3:	// ustawienie sensorMin
 						konfig.sensorMin = selectedValue;
-						saveState(EEPROM_sensorMin, konfig.sensorMin);
+						EEPROM.write(EEPROM_sensorMin, konfig.sensorMin);//saveState(EEPROM_sensorMin, konfig.sensorMin);
 						break;
 					
 					case 4:	// ustawienie sensorMax
 						konfig.sensorMax = konfig.sensorMin - selectedValue;
 						zbiornikMax	= selectedValue;
-						saveState(EEPROM_sensorMax, konfig.sensorMax);
+						EEPROM.write(EEPROM_sensorMax, konfig.sensorMax);//saveState(EEPROM_sensorMax, konfig.sensorMax);
+						/* ################## RADIO
+						
 						send(msg_max.set(zbiornikMax));
+						
+						################## RADIO */
 						break;
 					
 					case 5:	// ustawienie pomiarInterwal
 						konfig.pomiarInterwal=selectedValue;
-						saveState(EEPROM_pomiarInterwal, selectedValue);
+						EEPROM.write(EEPROM_pomiarInterwal, selectedValue);//saveState(EEPROM_pomiarInterwal, selectedValue);
 				}
 				page=1;				
 			}
@@ -523,13 +555,18 @@ void loop()
 				// tryb pracy POMIAR / przekroczenie poziomu
 				if(konfig.trybPracy)
 				{
-					// wchodzimy gdy został przekroczony poziom do wypompowania i jesteśmy w trybi AUTO
+					// wchodzimy gdy został przekroczony poziom do wypompowania i jesteśmy w trybie AUTO
 					// tryb pracy POMIAR / przekroczenie poziomu  / AUTO pompa
 					// wrkMode 0,3 realizują histereze pompy dla trybu Auto
 					konfig.wrkMode=3;
 					digitalWrite(PUMP_PIN, HIGH);
 					timerPomiar.setInterval(250);
-					send(msg_pump.set(true));						
+					autoStop=0;
+					/* ################## RADIO
+					
+					send(msg_pump.set(true));
+					
+					################## RADIO */
 				}	
 				else
 					// tryb pracy POMIAR / przekroczenie poziomu  / MANUAL pompa
@@ -538,11 +575,16 @@ void loop()
 			else
 				EkranPomiar(false, false, false);
 			
+			/*################## RADIO
+			
 			if(zbiornikPoziom_l!=zbiornikPoziom)
 			{
 				zbiornikPoziom_l=zbiornikPoziom;
+				
 				send(msg_poziom.set(zbiornikPoziom));
+				
 			}
+			################## RADIO */
 			break;
 	 	
 		case 1:
@@ -555,14 +597,20 @@ void loop()
 			break;
 		 		
 		case 3:
-			// wchodzimy gdy został przekroczony poziom do wypompowania
-			if(zbiornikPoziom<=0)
+			// wchodzimy gdy został przekroczony poziom do wypompowania i wypompowujemy wodę
+			if(zbiornikPoziom<=0 || autoStop>=120)
 			{
 				// wchodzimy jeżeli woda została wypompowana
 				konfig.wrkMode=0;
 				digitalWrite(PUMP_PIN, LOW);
 				timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+				autoStop=0;
+				
+				/* ################## RADIO
+				
 				send(msg_pump.set(false));
+				
+				################## RADIO */
 			}
 			// sprawdzenia w trybie MANUAL
 			if(zbiornikPoziom>zbiornikMax)
@@ -596,6 +644,9 @@ void loop()
 void pomiarIsr()
 {
 	blinkPomiar=true;
+	
+	if(konfig.wrkMode==3)
+		autoStop=autoStop+1;
 		
 	sensorPoziom = 	sonar.convert_cm(sonar.ping_median(3));	//sonar.ping_cm();
 
@@ -648,20 +699,30 @@ void onKeyStop()
 	if(konfig.wrkMode!=2)
 	{
 		// wejście do ekranu STOP
+		
+		/* ################## RADIO	
+		
 		send(msg_stop.set(true));
 		send(msg_pump.set(false));
+		
+		################## RADIO */
+  
 		digitalWrite(PUMP_PIN, LOW);
 		konfig.wrkMode=2;
 		timerPomiar.disable();
-		saveState(EEPROM_wrkMode, konfig.wrkMode);
+		EEPROM.write(EEPROM_wrkMode, konfig.wrkMode);//saveState(EEPROM_wrkMode, konfig.wrkMode);
 	}
 	else
 	{
+		/*################## RADIO
+		
 		send(msg_stop.set(false));
+		
+		################## RADIO */
 		konfig.wrkMode=0;
 		timerPomiar.enable();
 		timerPomiar.setInterval(konfig.pomiarInterwal*1000);
-		saveState(EEPROM_wrkMode, konfig.wrkMode);
+		EEPROM.write(EEPROM_wrkMode, konfig.wrkMode);//saveState(EEPROM_wrkMode, konfig.wrkMode);
 	}
 }
 
@@ -671,10 +732,13 @@ void onKeyManl()
 	 {
 		case 0:
 			//przycisk MANL zostal nacisniety, wchodzimy pierwszy raz, czyli wlaczamy pompe
-			expander.attachInterrupt(BTN_MANL, onKeyManl, CHANGE);
-			digitalWrite(PUMP_PIN, HIGH);
-			konfig.wrkMode = 3;
-			timerPomiar.setInterval(250);
+			if(zbiornikPoziom>0)
+			{
+				expander.attachInterrupt(BTN_MANL, onKeyManl, CHANGE);
+				digitalWrite(PUMP_PIN, HIGH);
+				konfig.wrkMode = 3;
+				timerPomiar.setInterval(250);				
+			}
 			break;
 		
 		case 1:

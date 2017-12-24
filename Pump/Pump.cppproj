@@ -85,8 +85,6 @@
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>../../../Pump</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
-      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
@@ -97,6 +95,8 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries</Value>
@@ -132,8 +132,6 @@
   <avrgcccpp.compiler.directories.IncludePaths>
     <ListValues>
       <Value>../../../Pump</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
-      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
@@ -144,6 +142,8 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries</Value>
@@ -202,8 +202,6 @@
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>../../../Pump</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
-      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
@@ -214,6 +212,8 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries</Value>
@@ -249,8 +249,6 @@
   <avrgcccpp.compiler.directories.IncludePaths>
     <ListValues>
       <Value>../../../Pump</Value>
-      <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/MySensors</Value>
-      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Adafruit_GFX_Library</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/arduino-Max72xxPanel-master</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/PCF8574</Value>
@@ -261,6 +259,8 @@
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/TimedAction</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/Time</Value>
       <Value>C:/Users/kfurmaniak/Documents/Arduino/libraries/ACS7XX_ALLEGRO-master</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src</Value>
+      <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility</Value>
       <Value>D:/Program Files (x86)/Arduino/libraries</Value>
       <Value>D:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries</Value>

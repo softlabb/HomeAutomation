@@ -18,9 +18,6 @@
 #define ARDUINO 10804
 #define ARDUINO_AVR_UNO
 #define ARDUINO_ARCH_AVR
-void before();
-void presentation();
-void receive(const MyMessage &message);
 //
 //
 void encoderIsr();
