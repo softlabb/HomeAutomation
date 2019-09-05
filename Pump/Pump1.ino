@@ -34,8 +34,8 @@
  * | SemVer      | Numerical   | Comments
  * |-------------|-------------|------------------
  * | 1.0.0       | 0x010000FF  | final
- * | 1.0.1		 | 0x010001FF  | fix funckji autoStop, w przypadku braku komunikacji z SR04 lub błędnym odczycie w trakcie pompowania, nie następowało wyłączenie pompy
- * |			 |			   | teraz wchodzimy w tryb STOP, dodatkowo zmniejszono czas pompowania do 60s
+ * | 1.0.1	 | 0x010001FF  | fix funckji autoStop, w przypadku braku komunikacji z SR04 lub błędnym odczycie w trakcie pompowania, nie następowało wyłączenie pompy
+ * |		 |	       | teraz wchodzimy w tryb STOP, dodatkowo zmniejszono czas pompowania do 60s
  * | 
  *
  */
