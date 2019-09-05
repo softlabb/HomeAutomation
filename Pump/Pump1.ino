@@ -612,13 +612,14 @@ void loop()
 		case 3:
 			// wchodzimy gdy został przekroczony poziom do wypompowania i wypompowujemy wodę
 			// wrkMode 0,3 realizują histereze pompy dla trybu Auto
-			if(zbiornikPoziom<=0 || autoStop>=60)
+			if(zbiornikPoziom<=0 || autoStop>=120)
 			{
 				// wchodzimy jeżeli woda została wypompowana bo zbiornikPoziom<=0
-				// lub zadziałało zabezpiecznie autoStop>=60(przekroczono czas pompowania ustawiony na 60s) tj. woda nie została wypompowana w tym czasie
-				if(autoStop>=60)
+				// lub zadziałało zabezpiecznie autoStop>=120(przekroczono czas pompowania ustawiony na 30s) tj. woda nie została wypompowana w tym czasie
+				if(autoStop>=120)
 				{
-					// skoro woda nie została wypompowana w czasie 60s to jest jakaś awaria i nalezy zatrzymać
+					// skoro woda nie została wypompowana w czasie 30s to jest jakaś awaria lub za dużo wody i nalezy zatrzymać proces
+					// wchodząc w tryb STOP
 					konfig.wrkMode=2;
 					digitalWrite(PUMP_PIN, LOW);
 					timerPomiar.disable();
