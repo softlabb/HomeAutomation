@@ -1,3 +1,4 @@
+
 /**
  * The MySensors Arduino library handles the wireless radio link and protocol
  * between your home built sensors/actuators and HA controller of choice.
@@ -21,7 +22,21 @@
  * REVISION HISTORY
  * 9/10/2017 Version 1.0 - Krzysztof Furmaniak
  *
- * DESCRIPTION
+ * These helper macros generate a numerical and alphanumerical (see http://www.semver.org) representation of the library version number, i.e
+ *
+ * Given a version number MAJOR.MINOR.PATCH, increment the:
+ *
+ * MAJOR version when you make incompatible API changes,
+ * MINOR version when you add functionality in a backwards compatible manner, and
+ * PATCH version when you make backwards compatible bug fixes.
+ * Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
+ *
+ * | SemVer      | Numerical   | Comments
+ * |-------------|-------------|------------------
+ * | 1.0.0       | 0x010000FF  | final
+ * | 1.0.1	 | 0x010001FF  | fix funckji autoStop, w przypadku braku komunikacji z SR04 lub błędnym odczycie w trakcie pompowania, nie następowało wyłączenie pompy
+ * |		 |	       | teraz wchodzimy w tryb STOP, dodatkowo zmniejszono czas pompowania do 60s
+ * | 
  *
  */
 
@@ -142,17 +157,14 @@ MyMessage msg_max(SENSOR_INFO_ID, V_TEXT);
 MyMessage msg_poziom(SENSOR_WATER_ID, V_DISTANCE);
  
 // -------------------------------------------------
-
 void before()
 {
 	pinMode(PUMP_PIN, OUTPUT);
 	digitalWrite(PUMP_PIN, PUMP_OFF);
-
 	matrix.setIntensity(0);
 	matrix.fillScreen(LOW);
 	matrix.print(">");
 	matrix.write();
-
 	// -----------------------------------------
 	// zapis startowy w pamięcie EEPROM, używane tylko podczas programowania
 	//
@@ -165,22 +177,17 @@ void before()
 	// -----------------------------------------
 	
 }
-
 // -------------------------------------------------
-
 void presentation()
 {
 	// Send the sketch version information to the gateway and Controller
 	sendSketchInfo("Pump", "1.0");
-
 	present(SENSOR_PUMP_ID, S_BINARY);
 	present(SENSOR_STOP_ID, S_BINARY);
 	present(SENSOR_INFO_ID, S_INFO);
 	present(SENSOR_WATER_ID, S_DISTANCE);
 }
-
 // -------------------------------------------------
-
 void receive(const MyMessage &message)
 {
 	// We only expect one type of message from controller. But we better check anyway.
@@ -204,7 +211,6 @@ void receive(const MyMessage &message)
 				saveState(EEPROM_wrkMode, konfig.wrkMode);				
 			}
 		}
-
 	}
 	
 	if (message.type==V_STATUS && message.sensor==SENSOR_PUMP_ID)
@@ -227,7 +233,6 @@ void receive(const MyMessage &message)
 		}
 	}
 }
-
 ################## RADIO */
 
 // -------------------------------------------------
@@ -249,7 +254,9 @@ void setup()
 	matrix.fillScreen(LOW);
 	matrix.print(">");
 	matrix.write();
-
+	
+	wdt_reset();	// kasowanie WATCHDOG
+	
 	//Buttons on PCF8574 
 	expander.begin(0x20);
 	expander.pinMode(BTN_MANL, INPUT);							// BUTTON - MANL
@@ -262,6 +269,8 @@ void setup()
 	expander.enableInterrupt(PCF_INT_PIN, onKeyboard);			//obsługa przerwania od PCFa
 	expander.attachInterrupt(BTN_STOP, onKeyStop, FALLING);
 	expander.attachInterrupt(BTN_MANL, onKeyManl, FALLING);
+
+	wdt_reset();	// kasowanie WATCHDOG
 	
 	// encoder
 	encoder = new ClickEncoder(A2, A1, A3);						//A3 button
@@ -269,6 +278,8 @@ void setup()
 	Timer1.initialize(1000);
 	Timer1.attachInterrupt( encoderIsr );
 	last = encoder->getValue();
+	
+	wdt_reset();	// kasowanie WATCHDOG
 	
 	// display on LED matrix
 	matrix.setIntensity(0);
@@ -291,10 +302,12 @@ void setup()
 		// setup initial configuration stored in EEPROM
 	konfig.wrkMode			= EEPROM.read(EEPROM_wrkMode);//loadState(EEPROM_wrkMode);
 	konfig.trybPracy		= EEPROM.read(EEPROM_trybPracy);//loadState(EEPROM_trybPracy);
-	konfig.pomiarInterwal	= EEPROM.read(EEPROM_pomiarInterwal);//loadState(EEPROM_pomiarInterwal);
+	konfig.pomiarInterwal		= EEPROM.read(EEPROM_pomiarInterwal);//loadState(EEPROM_pomiarInterwal);
 	konfig.sensorMin		= EEPROM.read(EEPROM_sensorMin);//loadState(EEPROM_sensorMin);
 	konfig.sensorMax		= EEPROM.read(EEPROM_sensorMax);//loadState(EEPROM_sensorMax);
 
+	wdt_reset();	// kasowanie WATCHDOG
+	
 	pomiarIsr();
 	
 	zbiornikMax	= konfig.sensorMin - konfig.sensorMax;
@@ -598,12 +611,28 @@ void loop()
 		 		
 		case 3:
 			// wchodzimy gdy został przekroczony poziom do wypompowania i wypompowujemy wodę
+			// wrkMode 0,3 realizują histereze pompy dla trybu Auto
 			if(zbiornikPoziom<=0 || autoStop>=120)
 			{
-				// wchodzimy jeżeli woda została wypompowana
-				konfig.wrkMode=0;
-				digitalWrite(PUMP_PIN, LOW);
-				timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+				// wchodzimy jeżeli woda została wypompowana bo zbiornikPoziom<=0
+				// lub zadziałało zabezpiecznie autoStop>=120(przekroczono czas pompowania ustawiony na 30s) tj. woda nie została wypompowana w tym czasie
+				if(autoStop>=120)
+				{
+					// skoro woda nie została wypompowana w czasie 30s to jest jakaś awaria lub za dużo wody i nalezy zatrzymać proces
+					// wchodząc w tryb STOP
+					konfig.wrkMode=2;
+					digitalWrite(PUMP_PIN, LOW);
+					timerPomiar.disable();
+					EEPROM.write(EEPROM_wrkMode, konfig.wrkMode);//saveState(EEPROM_wrkMode, konfig.wrkMode);
+				}
+				else
+				{
+					// wchodzimy jeżeli woda została wypompowana bo zbiornikPoziom<=0 w zadanym czasie bezpieczeństwa
+					konfig.wrkMode=0;				
+					digitalWrite(PUMP_PIN, LOW);
+					timerPomiar.setInterval(konfig.pomiarInterwal*1000);
+				}
+				
 				autoStop=0;
 				
 				/* ################## RADIO
@@ -634,7 +663,6 @@ void loop()
   Serial.println(currentNow, DEC);
   Serial.print("moyenne mouvante: ");
   Serial.println(currentSensor.getMovingAvgExp(), DEC);
-
   send(msg_acs.set(currentNow)); //V_CURRENT
   */
   
@@ -767,3 +795,4 @@ void onKeyManl()
 			}
 	 }
 }
+
