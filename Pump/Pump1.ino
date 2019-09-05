@@ -254,7 +254,9 @@ void setup()
 	matrix.fillScreen(LOW);
 	matrix.print(">");
 	matrix.write();
-
+	
+	wdt_reset();	// kasowanie WATCHDOG
+	
 	//Buttons on PCF8574 
 	expander.begin(0x20);
 	expander.pinMode(BTN_MANL, INPUT);							// BUTTON - MANL
@@ -267,6 +269,8 @@ void setup()
 	expander.enableInterrupt(PCF_INT_PIN, onKeyboard);			//obsługa przerwania od PCFa
 	expander.attachInterrupt(BTN_STOP, onKeyStop, FALLING);
 	expander.attachInterrupt(BTN_MANL, onKeyManl, FALLING);
+
+	wdt_reset();	// kasowanie WATCHDOG
 	
 	// encoder
 	encoder = new ClickEncoder(A2, A1, A3);						//A3 button
@@ -274,6 +278,8 @@ void setup()
 	Timer1.initialize(1000);
 	Timer1.attachInterrupt( encoderIsr );
 	last = encoder->getValue();
+	
+	wdt_reset();	// kasowanie WATCHDOG
 	
 	// display on LED matrix
 	matrix.setIntensity(0);
@@ -296,10 +302,12 @@ void setup()
 		// setup initial configuration stored in EEPROM
 	konfig.wrkMode			= EEPROM.read(EEPROM_wrkMode);//loadState(EEPROM_wrkMode);
 	konfig.trybPracy		= EEPROM.read(EEPROM_trybPracy);//loadState(EEPROM_trybPracy);
-	konfig.pomiarInterwal	= EEPROM.read(EEPROM_pomiarInterwal);//loadState(EEPROM_pomiarInterwal);
+	konfig.pomiarInterwal		= EEPROM.read(EEPROM_pomiarInterwal);//loadState(EEPROM_pomiarInterwal);
 	konfig.sensorMin		= EEPROM.read(EEPROM_sensorMin);//loadState(EEPROM_sensorMin);
 	konfig.sensorMax		= EEPROM.read(EEPROM_sensorMax);//loadState(EEPROM_sensorMax);
 
+	wdt_reset();	// kasowanie WATCHDOG
+	
 	pomiarIsr();
 	
 	zbiornikMax	= konfig.sensorMin - konfig.sensorMax;
