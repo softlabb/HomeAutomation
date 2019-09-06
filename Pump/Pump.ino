@@ -61,7 +61,7 @@
 #include <ClickEncoder.h>
 #include <TimerOne.h>
 #include <TimedAction.h>
-#include <Timelib.h>
+//#include <Timelib.h>
 #include <ACS7xx_Allegro.h>
 #include <avr/wdt.h>
 #include <EEPROM.h>
@@ -795,4 +795,3 @@ void onKeyManl()
 			}
 	 }
 }
-
