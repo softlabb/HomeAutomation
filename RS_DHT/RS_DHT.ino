@@ -118,12 +118,12 @@ void loop()
     //send(msgTemp.set(temperature, 1));
     Serial.print("T: ");
     Serial.println(temperature);
-  } 
-  else 
-  {
-    // Increase no update counter if the temperature stayed the same
-    nNoUpdatesTemp++;
-  }
+    } 
+    else 
+    {
+      // Increase no update counter if the temperature stayed the same
+      nNoUpdatesTemp++;
+    }
 
   // Get humidity from DHT library
   float humidity = dht.getHumidity();
