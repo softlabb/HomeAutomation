@@ -39,7 +39,23 @@
 
 //  *******************************/
 
+// Enable debug prints
+#define MY_DEBUG
+
+//  *******************************
+
+// Enable transport type
+// Enable RS485 transport layer
+#define MY_RS485
+
+// Define this to enables DE-pin management on defined pin
+#define MY_RS485_DE_PIN 2
+
+// Set RS485 baud rate to use
+#define MY_RS485_BAUD_RATE 9600
+
 #include <SPI.h>
+#include <MySensors.h>  
 #include <DHT.h>
 
 // Set this to the pin you connected the DHT's data pin to
@@ -70,9 +86,21 @@ uint8_t nNoUpdatesTemp;
 uint8_t nNoUpdatesHum;
 bool metric = true;
 
-//MyMessage msgHum(CHILD_ID_HUM, V_HUM);
-//MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
+MyMessage msgHum(CHILD_ID_HUM, V_HUM);
+MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 DHT dht;
+
+void presentation()  
+{ 
+  // Send the sketch version information to the gateway
+  sendSketchInfo("TemperatureAndHumidity", "1.0");
+
+  // Register all sensors to gw (they will be created as child devices)
+  present(CHILD_ID_HUM, S_HUM);
+  present(CHILD_ID_TEMP, S_TEMP);
+
+  metric = getControllerConfig().isMetric;
+}
 
 void setup()
 {
@@ -89,7 +117,7 @@ void setup()
   }
   // Sleep for the time of the minimum sampling period to give the sensor time to power up
   // (otherwise, timeout errors might occure for the first reading)
-  delay(dht.getMinimumSamplingPeriod());  
+  sleep(dht.getMinimumSamplingPeriod());  
 }
 
 
@@ -112,12 +140,19 @@ void loop()
 
       // apply the offset before converting to something different than Celsius degrees
       temperature += SENSOR_TEMP_OFFSET;
-
-    // Reset no updates counter
-    nNoUpdatesTemp = 0;
-    //send(msgTemp.set(temperature, 1));
-    Serial.print("T: ");
-    Serial.println(temperature);
+      if (!metric) 
+      {
+        temperature = dht.toFahrenheit(temperature);
+      }
+      
+      // Reset no updates counter
+      nNoUpdatesTemp = 0;
+      send(msgTemp.set(temperature, 1));
+    
+      #ifdef MY_DEBUG
+        Serial.print("T: ");
+        Serial.println(temperature);
+      #endif
     } 
     else 
     {
@@ -138,9 +173,12 @@ void loop()
       lastHum = humidity;
       // Reset no updates counter
       nNoUpdatesHum = 0;
-      //send(msgHum.set(humidity, 1));
-      Serial.print("H: ");
-      Serial.println(humidity);      
+      send(msgHum.set(humidity, 1));
+      
+      #ifdef MY_DEBUG
+        Serial.print("H: ");
+        Serial.println(humidity);
+      #endif
     } 
     else 
     {
@@ -150,7 +188,7 @@ void loop()
 
   // Sleep for a while to save energy
   digitalWrite(DHT_ON_PIN, HIGH);
-  delay(UPDATE_INTERVAL); 
+  sleep(UPDATE_INTERVAL); 
   digitalWrite(DHT_ON_PIN, LOW);
-  delay(3000);
+  sleep(3000);
 }
