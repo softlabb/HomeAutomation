@@ -25,10 +25,7 @@
  * 
  */
 
-// Enable debug prints
-#define MY_DEBUG
-
-//  *******************************
+/*  *******************************
 
 // Enable transport type
 // Enable RS485 transport layer
@@ -40,14 +37,15 @@
 // Set RS485 baud rate to use
 #define MY_RS485_BAUD_RATE 9600
 
-//  *******************************
+//  *******************************/
 
 #include <SPI.h>
-#include <MySensors.h>  
 #include <DHT.h>
 
 // Set this to the pin you connected the DHT's data pin to
 #define DHT_DATA_PIN 3
+// Set this to the pin you connected the DHT's data pin to
+#define DHT_ON_PIN 8
 
 // Set this offset if the sensor has a permanent small offset to the real temperatures.
 // In Celsius degrees (as measured by the device)
@@ -55,7 +53,7 @@
 
 // Sleep time between sensor updates (in milliseconds)
 // Must be >1000ms for DHT22 and >2000ms for DHT11
-static const uint64_t UPDATE_INTERVAL = 60000;
+static const uint64_t UPDATE_INTERVAL = 10000;
 
 // Force sending an update of the temperature after n sensor reads, so a controller showing the
 // timestamp of the last update doesn't show something like 3 hours in the unlikely case, that
@@ -72,34 +70,26 @@ uint8_t nNoUpdatesTemp;
 uint8_t nNoUpdatesHum;
 bool metric = true;
 
-MyMessage msgHum(CHILD_ID_HUM, V_HUM);
-MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
+//MyMessage msgHum(CHILD_ID_HUM, V_HUM);
+//MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 DHT dht;
-
-
-void presentation()  
-{ 
-  // Send the sketch version information to the gateway
-  sendSketchInfo("TemperatureAndHumidity", "1.0");
-
-  // Register all sensors to gw (they will be created as child devices)
-  present(CHILD_ID_HUM, S_HUM);
-  present(CHILD_ID_TEMP, S_TEMP);
-
-  metric = getControllerConfig().isMetric;
-}
-
 
 void setup()
 {
+  Serial.begin(115200);
+  pinMode(DHT_ON_PIN, OUTPUT);
+  digitalWrite(DHT_ON_PIN, LOW);
+  delay(3000);
+  
   dht.setup(DHT_DATA_PIN); // set data pin of DHT sensor
-  if (UPDATE_INTERVAL <= dht.getMinimumSamplingPeriod()) {
+  
+  if (UPDATE_INTERVAL <= dht.getMinimumSamplingPeriod()) 
+  {
     Serial.println("Warning: UPDATE_INTERVAL is smaller than supported by the sensor!");
   }
   // Sleep for the time of the minimum sampling period to give the sensor time to power up
   // (otherwise, timeout errors might occure for the first reading)
-  sleep(dht.getMinimumSamplingPeriod());
-  
+  delay(dht.getMinimumSamplingPeriod());  
 }
 
 
@@ -110,51 +100,57 @@ void loop()
 
   // Get temperature from DHT library
   float temperature = dht.getTemperature();
-  if (isnan(temperature)) {
+  if (isnan(temperature)) 
+  {
     Serial.println("Failed reading temperature from DHT!");
-  } else if (temperature != lastTemp || nNoUpdatesTemp == FORCE_UPDATE_N_READS) {
-    // Only send temperature if it changed since the last measurement or if we didn't send an update for n times
-    lastTemp = temperature;
+  } 
+  else 
+    if (temperature != lastTemp || nNoUpdatesTemp == FORCE_UPDATE_N_READS) 
+    {
+      // Only send temperature if it changed since the last measurement or if we didn't send an update for n times
+      lastTemp = temperature;
 
-    // apply the offset before converting to something different than Celsius degrees
-    temperature += SENSOR_TEMP_OFFSET;
+      // apply the offset before converting to something different than Celsius degrees
+      temperature += SENSOR_TEMP_OFFSET;
 
-    if (!metric) {
-      temperature = dht.toFahrenheit(temperature);
-    }
     // Reset no updates counter
     nNoUpdatesTemp = 0;
-    send(msgTemp.set(temperature, 1));
-
-    #ifdef MY_DEBUG
+    //send(msgTemp.set(temperature, 1));
     Serial.print("T: ");
     Serial.println(temperature);
-    #endif
-  } else {
+  } 
+  else 
+  {
     // Increase no update counter if the temperature stayed the same
     nNoUpdatesTemp++;
   }
 
   // Get humidity from DHT library
   float humidity = dht.getHumidity();
-  if (isnan(humidity)) {
+  if (isnan(humidity)) 
+  {
     Serial.println("Failed reading humidity from DHT");
-  } else if (humidity != lastHum || nNoUpdatesHum == FORCE_UPDATE_N_READS) {
-    // Only send humidity if it changed since the last measurement or if we didn't send an update for n times
-    lastHum = humidity;
-    // Reset no updates counter
-    nNoUpdatesHum = 0;
-    send(msgHum.set(humidity, 1));
-
-    #ifdef MY_DEBUG
-    Serial.print("H: ");
-    Serial.println(humidity);
-    #endif
-  } else {
-    // Increase no update counter if the humidity stayed the same
-    nNoUpdatesHum++;
-  }
+  } 
+  else 
+    if (humidity != lastHum || nNoUpdatesHum == FORCE_UPDATE_N_READS) 
+    {
+      // Only send humidity if it changed since the last measurement or if we didn't send an update for n times
+      lastHum = humidity;
+      // Reset no updates counter
+      nNoUpdatesHum = 0;
+      //send(msgHum.set(humidity, 1));
+      Serial.print("H: ");
+      Serial.println(humidity);      
+    } 
+    else 
+    {
+      // Increase no update counter if the humidity stayed the same
+      nNoUpdatesHum++;
+    }
 
   // Sleep for a while to save energy
-  sleep(UPDATE_INTERVAL); 
+  digitalWrite(DHT_ON_PIN, HIGH);
+  delay(UPDATE_INTERVAL); 
+  digitalWrite(DHT_ON_PIN, LOW);
+  delay(3000);
 }
