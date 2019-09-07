@@ -44,14 +44,18 @@
 #define F_CPU 1600000UL
 #endif
 
-/* ################## RADIO
+// #define MYSENSORS
+
+//################## RADIO
 // Enable debug prints to serial monitor
 //#define MY_DEBUG
-#define MY_RADIO_NRF24
-#define MY_REPEATER_FEATURE
-	
-#include <MySensors.h>
- ################## RADIO */
+#if MYSENSORS
+  #define MY_RADIO_NRF24
+  #define MY_REPEATER_FEATURE
+  #include <MySensors.h>
+#endif
+
+// ################## RADIO */
 
 #include <Adafruit_GFX.h>
 #include <Max72xxPanel.h>
