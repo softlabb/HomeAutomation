@@ -40,8 +40,8 @@
 //  *******************************/
 
 // Enable debug prints
-#define MY_DEBUG
-
+//#define MY_DEBUG
+//#define MY_NODE_ID 23
 //  *******************************
 
 // Enable transport type
@@ -69,7 +69,7 @@
 
 // Sleep time between sensor updates (in milliseconds)
 // Must be >1000ms for DHT22 and >2000ms for DHT11
-static const uint64_t UPDATE_INTERVAL = 10000;
+static const uint64_t UPDATE_INTERVAL = 600000;
 
 // Force sending an update of the temperature after n sensor reads, so a controller showing the
 // timestamp of the last update doesn't show something like 3 hours in the unlikely case, that
@@ -104,7 +104,7 @@ void presentation()
 
 void setup()
 {
-  Serial.begin(115200);
+  //Serial.begin(115200);
   pinMode(DHT_ON_PIN, OUTPUT);
   digitalWrite(DHT_ON_PIN, LOW);
   delay(3000);
