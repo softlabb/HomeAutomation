@@ -16,7 +16,7 @@
  * | SemVer      | Numerical   | Comments
  * |-------------|-------------|------------------
  * | 1.0.0       | 0x010000FF  | first version
- * | 
+ * | 2.0.0       | 0x020000FF  | for 2 DHT sensors
  ** 
  * 
  * DESCRIPTION
@@ -59,7 +59,9 @@
 #include <DHT.h>
 
 // Set this to the pin you connected the DHT's data pin to
-#define DHT_DATA_PIN 3
+#define DHT_DATA_PIN  3
+#define DHT1_DATA_PIN 4
+
 // Set this to the pin you connected the DHT's data pin to
 #define DHT_ON_PIN 8
 
@@ -79,25 +81,31 @@ static const uint8_t FORCE_UPDATE_N_READS = 10;
 
 #define CHILD_ID_HUM 0
 #define CHILD_ID_TEMP 1
+#define CHILD1_ID_HUM 2
+#define CHILD1_ID_TEMP 3
 
-float lastTemp;
-float lastHum;
-uint8_t nNoUpdatesTemp;
-uint8_t nNoUpdatesHum;
+float lastTemp, lastTemp1;
+float lastHum, lastHum1;
+uint8_t nNoUpdatesTemp, nNoUpdatesTemp1;
+uint8_t nNoUpdatesHum, nNoUpdatesHum1;
 bool metric = true;
 
 MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
-DHT dht;
+MyMessage msgHum1(CHILD1_ID_HUM, V_HUM);
+MyMessage msgTemp1(CHILD1_ID_TEMP, V_TEMP);
+DHT dht, dht1;
 
 void presentation()  
 { 
   // Send the sketch version information to the gateway
-  sendSketchInfo("TemperatureAndHumidity", "1.0");
+  sendSketchInfo("TemperatureAndHumidity", "2.0");
 
   // Register all sensors to gw (they will be created as child devices)
   present(CHILD_ID_HUM, S_HUM);
   present(CHILD_ID_TEMP, S_TEMP);
+  present(CHILD1_ID_HUM, S_HUM);
+  present(CHILD1_ID_TEMP, S_TEMP);
 
   metric = getControllerConfig().isMetric;
 }
@@ -110,6 +118,7 @@ void setup()
   delay(3000);
   
   dht.setup(DHT_DATA_PIN); // set data pin of DHT sensor
+  dht1.setup(DHT1_DATA_PIN); // set data pin of DHT sensor
   
   if (UPDATE_INTERVAL <= dht.getMinimumSamplingPeriod()) 
   {
@@ -125,9 +134,12 @@ void loop()
 {    
   // Force reading sensor, so it works also after sleep()
   dht.readSensor(true);
+  dht1.readSensor(true);
 
+  //******************* DHT TEMP **************************
   // Get temperature from DHT library
   float temperature = dht.getTemperature();
+
   if (isnan(temperature)) 
   {
     Serial.println("Failed reading temperature from DHT!");
@@ -160,6 +172,44 @@ void loop()
       nNoUpdatesTemp++;
     }
 
+  //******************* DHT1 TEMP **************************
+
+  float temperature1 = dht1.getTemperature();
+
+  if (isnan(temperature1)) 
+  {
+    Serial.println("Failed reading temperature from DHT!");
+  } 
+  else 
+    if (temperature1 != lastTemp1 || nNoUpdatesTemp1 == FORCE_UPDATE_N_READS) 
+    {
+      // Only send temperature if it changed since the last measurement or if we didn't send an update for n times
+      lastTemp1 = temperature1;
+
+      // apply the offset before converting to something different than Celsius degrees
+      temperature1 += SENSOR_TEMP_OFFSET;
+      if (!metric) 
+      {
+        temperature1 = dht1.toFahrenheit(temperature1);
+      }
+      
+      // Reset no updates counter
+      nNoUpdatesTemp1 = 0;
+      send(msgTemp1.set(temperature1, 1));
+    
+      #ifdef MY_DEBUG
+        Serial.print("T: ");
+        Serial.println(temperature1);
+      #endif
+    } 
+    else 
+    {
+      // Increase no update counter if the temperature stayed the same
+      nNoUpdatesTemp1++;
+    }
+
+  //******************* DHT HUM **************************
+
   // Get humidity from DHT library
   float humidity = dht.getHumidity();
   if (isnan(humidity)) 
@@ -184,6 +234,34 @@ void loop()
     {
       // Increase no update counter if the humidity stayed the same
       nNoUpdatesHum++;
+    }
+
+  //******************* DHT1 HUM **************************
+
+  // Get humidity from DHT library
+  float humidity1 = dht1.getHumidity();
+  if (isnan(humidity1)) 
+  {
+    Serial.println("Failed reading humidity from DHT");
+  } 
+  else 
+    if (humidity1 != lastHum1 || nNoUpdatesHum1 == FORCE_UPDATE_N_READS) 
+    {
+      // Only send humidity if it changed since the last measurement or if we didn't send an update for n times
+      lastHum1 = humidity1;
+      // Reset no updates counter
+      nNoUpdatesHum1 = 0;
+      send(msgHum1.set(humidity1, 1));
+      
+      #ifdef MY_DEBUG
+        Serial.print("H: ");
+        Serial.println(humidity1);
+      #endif
+    } 
+    else 
+    {
+      // Increase no update counter if the humidity stayed the same
+      nNoUpdatesHum1++;
     }
 
   // Sleep for a while to save energy
