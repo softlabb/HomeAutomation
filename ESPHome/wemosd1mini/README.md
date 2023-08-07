@@ -1,1 +1,1 @@
-#Zegar + wyświetlenie temparatury z samolu 
+#Zegar + wyświetlenie temparatury co 1min z salonu 
