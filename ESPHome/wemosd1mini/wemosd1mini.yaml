@@ -1,0 +1,191 @@
+esphome:
+  name: wemosd1mini
+  friendly_name: wemosD1mini
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Example configuration entry
+api:
+  encryption:
+    key: !secret esphome_encryption_key
+
+ota:
+  password: "86fa3a743fc1ce0e66b225f093f46ba4"
+
+wifi:
+  ssid: "SKYNET4"
+  password: "a1a1a1a1a1a1a1a1a1a1"
+  
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Wemosd1mini_Fallback_Hotspot"
+    password: "12345678"
+
+captive_portal:
+
+#Nazwa Twojego urządzenia wyświetlana w Home Assistant
+substitutions:
+  device_name: "WemosD1mini" 
+
+# Pobieranie czasu z HA
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    
+# Dioda LED Informacyjna o stanie połącznia.
+status_led:
+  pin: 
+    number: GPIO2 #PIN D4
+    inverted: true  # "yes" - Dioda mruga gdy nie można nawiązać połączenie.
+                    # "no"  - Dioda świeci gdy połączenie jest nawiązane.    
+
+# Przyscisk Restartu Urządzenia  
+switch:
+  - platform: restart
+    name: "${device_name} Reset"
+  - platform: gpio
+    name: "LED1"
+    pin: D6
+
+binary_sensor:
+# Status Urządzenia
+  - platform: status
+    name: "${device_name} Status"
+  - platform: gpio
+    pin:
+      number: D5
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "BW1"
+  - platform: homeassistant
+    name: "HA zegar on off"
+    id: hazegaronoff
+    entity_id: input_boolean.zegar_on_off
+
+sensor:
+# Poziom Sygnału WiFi
+  - platform: wifi_signal
+    name: "${device_name} WiFi Sygnał"
+    update_interval: 160s
+
+# Czas Pracy Urządzenia
+  - platform: uptime
+    name: "${device_name} Czas Pracy"
+    update_interval: 300s
+    device_class: "timestamp"
+    entity_category: "diagnostic"
+    unit_of_measurement: ""
+    filters:
+      - lambda: |-
+          auto time = id(homeassistant_time).now();
+          if (time.is_valid()) {
+            return time.timestamp - x;
+          } else {
+            return {};
+          }   
+  # sensor z HA do pobrania
+  - platform: homeassistant
+    name: "Temperature From Home Assistant salon"
+    entity_id: sensor.lumi_lumi_weather_temperature
+    id: TempSalon
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "${device_name} IP Adres"
+    ssid:
+      name: "${device_name} Połączony z siecią"
+    mac_address:
+      name: "${device_name} Mac Adres WiFi" 
+  - platform: homeassistant
+    name: "HA Brightness"
+    id: habri
+    entity_id: input_number.venner_bri
+    
+# Example configuration entry
+spi:
+  clk_pin: D0
+  mosi_pin: D1
+
+globals:
+  - id: my_global_int
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+interval:
+  - interval: 1min
+    then:
+      - script.execute: show_temp_script 
+
+script:
+  - id: show_temp_script
+    mode: restart
+    then:
+      - lambda: |-
+          id(hazegaronoff).publish_state(false);
+      - delay: 13s
+      - lambda: |-
+          id(hazegaronoff).publish_state(true);
+
+display:
+  - platform: max7219digit
+    cs_pin: D2
+    num_chips: 4
+    intensity: 0
+    reverse_enable: True
+    update_interval: 100ms
+    id: my_display
+    lambda: |-
+      if( id(hazegaronoff).state ) {  
+        static int sec = 0;
+        static int x = 0;
+        it.strftime(6, 0, id(digit_font), "%H:%M", id(homeassistant_time).now());
+        auto time = id(homeassistant_time).now().second;
+        it.intensity(atoi(id(habri).state.c_str()));
+        sec = time + 1;
+        if(time>=30){
+          if(time==30)
+            x=time;
+          else
+            x=60-time;
+        } else
+          x=time+1;
+        it.line(x, 7, x, 7);
+      } else {
+        it.scroll(true, max7219digit::STOP, 50, 500, 1500);
+        it.printf(0, 0, id(digit_font), "Temperatura w salonie  %.1f°C", id(TempSalon).state);
+      }
+
+# id(hazegaronoff).publish_state(true);
+
+#        static int linia = 0;
+#        if(linia>7) {
+#          linia=0;
+#          id(hazegaronoff).publish_state(true);
+#        } else {
+#          it.line(0, linia, 31, linia);
+#          linia += 1;
+#        }
+
+# it.printf(0, 0, id(digit_font), "Temperatura w sypialni  %.1f°C", id(TempSalon).state);
+# linijka na dole wyświetlacza
+#        it.scroll(true, max7219digit::STOP, 100, 5000, 1500);
+#        it.printf(0, 0, id(digit_font), "Temperatura w sypialni %.1f°C", id(TempSalon).state);
+#      it.line(x, 7, x, 7); # kropka na dole wyświetlacza
+
+
+# it.printf(0, 0, id(digit_font), "Temperatura w sypialni %.1f°C", id(TempSalon).state);
+# it.line(1, 7, 1, 7);
+# it.scroll(true, max7219digit::STOP, 100, 5000, 1500);
+
+font:
+  - file: "fonts/pixelmix.ttf"
+    id: digit_font
+    size: 6
