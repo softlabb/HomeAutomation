@@ -1,4 +1,6 @@
+﻿
 # HomeAutomation
-Repository of home automation system based on mysensors software
-mySensors
-ESPHome
+Repository of home automation systems based on:
+ - mySensors
+ - ESPHome
+technology.
